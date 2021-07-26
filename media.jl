@@ -7,10 +7,10 @@ function bias_media_iteration(g, ϵ, γ, γₘ, pₘ, media_op, old_opinions, ne
 
     for u in vertices(g)
 
-        uₒ = old_opinions[u]
+        uₒ::Float16 = Float16(old_opinions[u])
 
         media_access = rand()
-        o = uₒ
+        o::Float16 = uₒ
         if media_access < pₘ
             # biased access to media
             media_within_bound = [abs(uₒ - x) <= ϵ for x in media_op]
@@ -20,7 +20,7 @@ function bias_media_iteration(g, ϵ, γ, γₘ, pₘ, media_op, old_opinions, ne
                 mediaₚϵ = [abs(uₒ - x)^γ for x in candidate_media]
                 mediaₚϵ /= sum(mediaₚϵ)
                 selected = sample(candidate_media, Weights(mediaₚϵ))
-                o = Float16((selected + uₒ) / 2)
+                o = (selected + uₒ) / 2
             end
         end
 
@@ -38,7 +38,7 @@ function bias_media_iteration(g, ϵ, γ, γₘ, pₘ, media_op, old_opinions, ne
             Γₚϵ = [abs(uₒ - x)^γ for x in old_opinions[likeminded]]
             Γₚϵ /= sum(Γₚϵ)
             selected = sample(likeminded, Weights(Γₚϵ))
-            nn = (old_opinions[selected] + o) / 2
+            nn = Float16((old_opinions[selected] + o) / 2)
             new_opinions[u] = nn
         end
     end
@@ -47,15 +47,17 @@ end
 
 
 function deffuant_bias_media(g, ϵ, γ, γₘ, pₘ, media_op, max_t)
-    res =[]
+    res = []
     # shared opinion arrays
     old_opinions = Array{Float16}(undef, nv(g))
     new_opinions = Array{Float16}(undef, nv(g))
     for u in vertices(g)
         op = rand()
-        old_opinions[u] = op
-        new_opinions[u] = op
+        old_opinions[u] = Float16(op)
+        new_opinions[u] = Float16(op)
     end
+
+    media_op = [Float16(o) for o in media_op]
 
     obs = Tuple(old_opinions)
     append!(res,[obs])
@@ -69,7 +71,7 @@ end
 
 
 #########################################
-max_t = 1000000
+max_t = 10000
 ϵ = 0.35
 γ = 1.8
 γₘ = 1.0
@@ -82,4 +84,4 @@ g = erdos_renyi(n, p)
 
 
 # model call
-r = deffuant_bias_media(g, ϵ, γ, γₘ, pₘ, media_op, max_t)
+r =  deffuant_bias_media(g, ϵ, γ, γₘ, pₘ, media_op, max_t)
