@@ -4,7 +4,7 @@ using ProgressBars
 using CSV
 using DataFrames
 using Plots
-using GR
+#using GR
 
 
 function deffuant_iteration(g, ϵ, old_opinions, new_opinions)
@@ -60,7 +60,7 @@ function spaghetti_plot(df, max_t, filename)
             plot!(p, 1:max_t, df[!, i], color="#0000ff")
         end
     end
-    Plots.savefig(filename)
+    savefig(filename)
 end
 
 #########################################
@@ -76,5 +76,5 @@ experiment_name = "Deffuant_$n-$ϵ-$max_t"
 r = deffuant(g, ϵ, max_t)
 df = DataFrame(r)
 
-CSV.write("$experiment_name.csv",  df, writeheader=false)
+CSV.write("$experiment_name.csv",  df, header=false)
 spaghetti_plot(df, max_t, "$experiment_name.pdf")

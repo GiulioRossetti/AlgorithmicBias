@@ -4,7 +4,6 @@ using ProgressBars
 using CSV
 using DataFrames
 using Plots
-using GR
 
 
 function bias_media_iteration(g, ϵ, γ, γₘ, pₘ, media_op, old_opinions, new_opinions)
@@ -69,6 +68,7 @@ function deffuant_bias_media(g, ϵ, γ, γₘ, pₘ, media_op, max_t)
         append!(res,[ops])
         old_opinions = new_opinions
     end
+    return res
 end
 
 
@@ -83,7 +83,7 @@ function spaghetti_plot(df, max_t, filename)
             plot!(p, 1:max_t, df[!, i], color="#0000ff")
         end
     end
-    Plots.savefig(filename)
+    savefig(filename)
 end
 
 #########################################
@@ -104,5 +104,5 @@ experiment_name = "Media_$n-$ϵ-$γ-$(γₘ)-$(pₘ)-$media_op-$max_t"
 r =  deffuant_bias_media(g, ϵ, γ, γₘ, pₘ, media_op, max_t)
 df = DataFrame(r)
 
-CSV.write("$experiment_name.csv",  df, writeheader=false)
+CSV.write("$experiment_name.csv",  df, header=false)
 spaghetti_plot(df, max_t, "$experiment_name.pdf")

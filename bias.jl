@@ -81,5 +81,5 @@ experiment_name = "Bias_$n-$ϵ-$γ-$max_t"
 r = deffuant_bias(g, ϵ, γ, max_t)
 df = DataFrame(r)
 
-CSV.write("$experiment_name.csv",  df, writeheader=false)
+CSV.write("$experiment_name.csv",  df, header=false)
 spaghetti_plot(df, max_t, "$experiment_name.pdf")
