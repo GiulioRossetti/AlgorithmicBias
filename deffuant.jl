@@ -1,8 +1,10 @@
 using LightGraphs
 using StatsBase
 using ProgressBars
-#using Distributed
-#using SharedArrays
+using CSV
+using DataFrames
+using Plots
+using GR
 
 
 function deffuant_iteration(g, ϵ, old_opinions, new_opinions)
@@ -37,8 +39,6 @@ function deffuant(g, ϵ, max_t)
         old_opinions[n] = op
         new_opinions[n] = op
     end
-    obs = Tuple(old_opinions)
-    append!(res,[obs])
     for t in ProgressBar(1:max_t)
         new_opinions = deffuant_iteration(g, ϵ, old_opinions, new_opinions)
         ops = Tuple(new_opinions)
@@ -49,19 +49,32 @@ function deffuant(g, ϵ, max_t)
 end
 
 
+function spaghetti_plot(df, max_t, filename)
+    p = plot(1:max_t, df[!, 1], legend = false, color="#ffffff", ylims = (0,1))
+    for i in 1:n
+        if df[!, i][1] <= 0.33
+            plot!(p, 1:max_t, df[!, i], color="#ff0000")
+        elseif 0.33 < df[!, i][1] <= 0.66
+            plot!(p, 1:max_t, df[!, i], color="#00ff00")
+        else
+            plot!(p, 1:max_t, df[!, i], color="#0000ff")
+        end
+    end
+    Plots.savefig(filename)
+end
+
 #########################################
-max_t = 1000000
+
+max_t = 100000
 ϵ = 0.3
 n = 100
 p = 1.0
 g = erdos_renyi(n, p)
 
+experiment_name = "Deffuant_$n-$ϵ-$max_t"
 
-# model call
 r = deffuant(g, ϵ, max_t)
+df = DataFrame(r)
 
-
-for l in r
-    p = [float(x) for x in l]
-    write(io, "$p\n")
-end
+CSV.write("$experiment_name.csv",  df, writeheader=false)
+spaghetti_plot(df, max_t, "$experiment_name.pdf")

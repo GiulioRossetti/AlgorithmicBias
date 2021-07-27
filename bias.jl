@@ -1,6 +1,10 @@
 using LightGraphs
 using StatsBase
 using ProgressBars
+using CSV
+using DataFrames
+using Plots
+using GR
 
 
 function bias_iteration(g, ϵ, γ, old_opinions, new_opinions)
@@ -40,8 +44,6 @@ function deffuant_bias(g, ϵ, γ, max_t)
         new_opinions[n] = op
     end
 
-    obs = Tuple(old_opinions)
-    append!(res,[obs])
     for t in ProgressBar(1:max_t)
         new_opinions = bias_iteration(g, ϵ, γ, old_opinions, new_opinions)
         ops = Tuple(new_opinions)
@@ -51,23 +53,33 @@ function deffuant_bias(g, ϵ, γ, max_t)
     return res
 end
 
+function spaghetti_plot(df, max_t, filename)
+    p = plot(1:max_t, df[!, 1], legend = false, color="#ffffff", ylims = (0,1))
+    for i in 1:n
+        if df[!, i][1] <= 0.33
+            plot!(p, 1:max_t, df[!, i], color="#ff0000")
+        elseif 0.33 < df[!, i][1] <= 0.66
+            plot!(p, 1:max_t, df[!, i], color="#00ff00")
+        else
+            plot!(p, 1:max_t, df[!, i], color="#0000ff")
+        end
+    end
+    Plots.savefig(filename)
+end
 
 #########################################
-max_t = 1000000
+max_t = 10000
 ϵ = 0.25
 γ = 1.8
 n = 100
 p = 1.0
 g = erdos_renyi(n, p)
 
+experiment_name = "Bias_$n-$ϵ-$γ-$max_t"
 
 # model call
 r = deffuant_bias(g, ϵ, γ, max_t)
+df = DataFrame(r)
 
-
-io = open("bias.txt", "w")
-for l in r[1:3]
-    p = [float(x) for x in l]
-    write(io, "$p\n")
-end
-close(io)
+CSV.write("$experiment_name.csv",  df, writeheader=false)
+spaghetti_plot(df, max_t, "$experiment_name.pdf")
