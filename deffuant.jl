@@ -50,7 +50,7 @@ end
 
 
 function spaghetti_plot(df, max_t, filename)
-    p = plot(1:max_t, df[!, 1], legend = false, color="#ffffff", ylims = (0,1))
+    p = plot(1:max_t, df[!, 1], legend = false, color="#ffffff", ylims = (0,1), xlabel="Iterations", ylabel="Opinions")
     for i in 1:n
         if df[!, i][1] <= 0.33
             plot!(p, 1:max_t, df[!, i], color="#ff0000")
