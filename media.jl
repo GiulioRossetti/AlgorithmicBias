@@ -1,9 +1,12 @@
+include("utils.jl")
+
 using LightGraphs
 using StatsBase
 using ProgressBars
 using CSV
 using DataFrames
 using Plots
+using JSON
 
 
 function bias_media_iteration(g, ϵ, γ, γₘ, pₘ, media_op, old_opinions, new_opinions)
@@ -49,8 +52,9 @@ function bias_media_iteration(g, ϵ, γ, γₘ, pₘ, media_op, old_opinions, ne
 end
 
 
-function deffuant_bias_media(g, ϵ, γ, γₘ, pₘ, media_op, max_t)
+function deffuant_bias_media(g, ϵ, γ, γₘ, pₘ, media_op, max_t ; nsteady=10)
     res = []
+    st = 0
     # shared opinion arrays
     old_opinions = Array{Float16}(undef, nv(g))
     new_opinions = Array{Float16}(undef, nv(g))
@@ -64,30 +68,46 @@ function deffuant_bias_media(g, ϵ, γ, γₘ, pₘ, media_op, max_t)
 
     for t in ProgressBar(1:max_t)
         new_opinions = bias_media_iteration(g, ϵ, γ, γₘ, pₘ, media_op, old_opinions, new_opinions)
+
+        is_steady(new_opinions, old_opinions) ? st += 1 : st = 0
+
         ops = Tuple(new_opinions)
         append!(res,[ops])
         old_opinions = new_opinions
+
+        if st == nsteady
+            return res
+        end
+
     end
     return res
 end
 
+#########################################
 
-function spaghetti_plot(df, max_t, filename)
-    p = plot(1:max_t, df[!, 1], legend = false, color="#ffffff", ylims = (0,1), xlabel="Iterations", ylabel="Opinions")
-    for i in 1:n
-        if df[!, i][1] <= 0.33
-            plot!(p, 1:max_t, df[!, i], color="#ff0000")
-        elseif 0.33 < df[!, i][1] <= 0.66
-            plot!(p, 1:max_t, df[!, i], color="#00ff00")
-        else
-            plot!(p, 1:max_t, df[!, i], color="#0000ff")
-        end
+function multiple_runs(f, name, g, ϵ, γ, γₘ, pₘ, media_op, max_t, nsteady; nruns)
+    finalops = []
+    final_clusters = []
+    for nr in 1:nruns
+        r =  f(g, ϵ, γ, γₘ, pₘ, media_op, max_t; nsteady=nsteady)
+
+        df = DataFrame(r)
+        experiment_name = "$name e$ϵ g$γ gm$γ p$pₘ mi$max_t nr$nr.csv"
+        CSV.write("res/$experiment_name.csv",  df, header=false)
+        spaghetti_plot(df, size(r)[1], "plots/$experiment_name.png")
+
+        # aggregate stats
+        fo = r[size(r)[1]]
+        clusters = population_clusters([x for x in r[end]], ϵ)
+        append!(final_clusters, clusters)
+        append!(finalops, [fo])
     end
-    savefig(filename)
+    return finalops, final_clusters
 end
 
 #########################################
 max_t = 100
+nsteady = 50
 media_op = [0.1, 0.5, 0.9]
 
 n = 250
@@ -96,15 +116,19 @@ g = erdos_renyi(n, p)
 
 for ϵ in [0.1, 0.2, 0.3, 0.4], γ in [0, 1, 1.5, 2], γₘ in  [0, 1, 1.5, 2],  pₘ in [0.1, 0.2, 0.3, 0.4]
 
-    experiment_name = "Media_$n-$ϵ-$γ-$(γₘ)-$(pₘ)-$media_op-$max_t"
+#    experiment_name = "Media_$n-$ϵ-$γ-$(γₘ)-$(pₘ)-$media_op-$max_t"
 
     # model call
-    r =  deffuant_bias_media(g, ϵ, γ, γₘ, pₘ, media_op, max_t)
-    println("Loading DataFrame")
-    df = DataFrame(r)
+#    r =  deffuant_bias_media(g, ϵ, γ, γₘ, pₘ, media_op, max_t, nsteady=nsteady)
+    final_opinions, final_clusters = multiple_runs(deffuant_bias_media, "media", g, ϵ, γ, γₘ, pₘ, media_op, max_t, nsteady; nruns=10)
+    df = DataFrame(final_opinions)
+    CSV.write("aggregate/media final_opinions e$ϵ g$γ gm$γ p$pₘ mi$max_t.txt",  df, header=false)
 
-    println("Saving results")
-    CSV.write("res/$experiment_name.csv",  df, header=false)
-    spaghetti_plot(df, max_t, "plots/$experiment_name.png")
+    json_string = JSON.json(final_clusters)
+    open("aggregate/media final_clusters e$ϵ g$γ gm$γ p$pₘ mi$max_t.json","w") do f
+        write(f, json_string)
+    end
+
+    #spaghetti_plot(df, size(r)[1], "plots/$experiment_name.png")
 
 end
