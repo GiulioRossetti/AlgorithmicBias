@@ -68,18 +68,23 @@ function spaghetti_plot(df, max_t, filename)
 end
 
 #########################################
-max_t = 10000
-ϵ = 0.25
-γ = 1.8
-n = 100
+max_t = 100
+n = 250
 p = 1.0
 g = erdos_renyi(n, p)
 
-experiment_name = "Bias_$n-$ϵ-$γ-$max_t"
+for ϵ in [0.1, 0.2, 0.3, 0.4], γ in [0, 1, 1.5, 2]
 
-# model call
-r = deffuant_bias(g, ϵ, γ, max_t)
-df = DataFrame(r)
+    experiment_name = "Bias_$n-$ϵ-$γ-$max_t"
+    println(experiment_name)
 
-CSV.write("$experiment_name.csv",  df, header=false)
-spaghetti_plot(df, max_t, "$experiment_name.pdf")
+    # model call
+    r = deffuant_bias(g, ϵ, γ, max_t)
+    println("Loading DataFrame")
+    df = DataFrame(r)
+
+    println("Saving results")
+    CSV.write("res/$experiment_name.csv",  df, header=false)
+    spaghetti_plot(df, max_t, "plots/$experiment_name.png")
+
+end

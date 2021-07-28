@@ -87,22 +87,24 @@ function spaghetti_plot(df, max_t, filename)
 end
 
 #########################################
-max_t = 10000
-ϵ = 0.35
-γ = 1.8
-γₘ = 1.0
-pₘ = 0.3
+max_t = 100
 media_op = [0.1, 0.5, 0.9]
 
-n = 100
+n = 250
 p = 1.0
 g = erdos_renyi(n, p)
 
-experiment_name = "Media_$n-$ϵ-$γ-$(γₘ)-$(pₘ)-$media_op-$max_t"
+for ϵ in [0.1, 0.2, 0.3, 0.4], γ in [0, 1, 1.5, 2], γₘ in  [0, 1, 1.5, 2],  pₘ in [0.1, 0.2, 0.3, 0.4]
 
-# model call
-r =  deffuant_bias_media(g, ϵ, γ, γₘ, pₘ, media_op, max_t)
-df = DataFrame(r)
+    experiment_name = "Media_$n-$ϵ-$γ-$(γₘ)-$(pₘ)-$media_op-$max_t"
 
-CSV.write("$experiment_name.csv",  df, header=false)
-spaghetti_plot(df, max_t, "$experiment_name.pdf")
+    # model call
+    r =  deffuant_bias_media(g, ϵ, γ, γₘ, pₘ, media_op, max_t)
+    println("Loading DataFrame")
+    df = DataFrame(r)
+
+    println("Saving results")
+    CSV.write("res/$experiment_name.csv",  df, header=false)
+    spaghetti_plot(df, max_t, "plots/$experiment_name.png")
+
+end

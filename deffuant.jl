@@ -65,16 +65,23 @@ end
 
 #########################################
 
-max_t = 100000
-ϵ = 0.3
-n = 100
+max_t = 200
+n = 250
 p = 1.0
 g = erdos_renyi(n, p)
 
-experiment_name = "Deffuant_$n-$ϵ-$max_t"
+for ϵ in [0.1, 0.2, 0.3, 0.4]
 
-r = deffuant(g, ϵ, max_t)
-df = DataFrame(r)
+    experiment_name = "Deffuant_$n-$ϵ-$max_t"
+    println(experiment_name)
 
-CSV.write("$experiment_name.csv",  df, header=false)
-spaghetti_plot(df, max_t, "$experiment_name.pdf")
+    r = deffuant(g, ϵ, max_t)
+
+    println("Loading DataFrame")
+    df = DataFrame(r)
+
+    println("Saving results")
+    CSV.write("res/$experiment_name.csv",  df, header=false)
+    spaghetti_plot(df, max_t, "plots/$experiment_name.png")
+
+end
