@@ -115,11 +115,6 @@ p = 1.0
 g = erdos_renyi(n, p)
 
 for ϵ in [0.1, 0.2, 0.3, 0.4], γ in [0, 1, 1.5, 2], γₘ in  [0, 1, 1.5, 2],  pₘ in [0.1, 0.2, 0.3, 0.4]
-
-#    experiment_name = "Media_$n-$ϵ-$γ-$(γₘ)-$(pₘ)-$media_op-$max_t"
-
-    # model call
-#    r =  deffuant_bias_media(g, ϵ, γ, γₘ, pₘ, media_op, max_t, nsteady=nsteady)
     final_opinions, final_clusters = multiple_runs(deffuant_bias_media, "media", g, ϵ, γ, γₘ, pₘ, media_op, max_t, nsteady; nruns=10)
     df = DataFrame(final_opinions)
     CSV.write("aggregate/media final_opinions e$ϵ g$γ gm$γ p$pₘ mi$max_t.txt",  df, header=false)
@@ -128,7 +123,4 @@ for ϵ in [0.1, 0.2, 0.3, 0.4], γ in [0, 1, 1.5, 2], γₘ in  [0, 1, 1.5, 2], 
     open("aggregate/media final_clusters e$ϵ g$γ gm$γ p$pₘ mi$max_t.json","w") do f
         write(f, json_string)
     end
-
-    #spaghetti_plot(df, size(r)[1], "plots/$experiment_name.png")
-
 end
