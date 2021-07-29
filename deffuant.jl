@@ -1,11 +1,8 @@
+include("utils.jl")
+
 using LightGraphs
 using StatsBase
 using ProgressBars
-using CSV
-using DataFrames
-using Plots
-#using GR
-
 
 function deffuant_iteration(g, ϵ, old_opinions, new_opinions)
     res = []
@@ -29,8 +26,9 @@ function deffuant_iteration(g, ϵ, old_opinions, new_opinions)
 end
 
 
-function deffuant(g, ϵ, max_t)
+function deffuant(g, ϵ, max_t; nsteady=10)
     res = []
+    st = 0
     # shared opinion arrays
     old_opinions = Array{Float16}(undef, nv(g))
     new_opinions = Array{Float16}(undef, nv(g))
@@ -41,47 +39,16 @@ function deffuant(g, ϵ, max_t)
     end
     for t in ProgressBar(1:max_t)
         new_opinions = deffuant_iteration(g, ϵ, old_opinions, new_opinions)
+
+        is_steady(new_opinions, old_opinions) ? st += 1 : st = 0
+
         ops = Tuple(new_opinions)
         append!(res,[ops])
         old_opinions = new_opinions
-    end
-    return res
-end
 
-
-function spaghetti_plot(df, max_t, filename)
-    p = plot(1:max_t, df[!, 1], legend = false, color="#ffffff", ylims = (0,1), xlabel="Iterations", ylabel="Opinions")
-    for i in 1:n
-        if df[!, i][1] <= 0.33
-            plot!(p, 1:max_t, df[!, i], color="#ff0000")
-        elseif 0.33 < df[!, i][1] <= 0.66
-            plot!(p, 1:max_t, df[!, i], color="#00ff00")
-        else
-            plot!(p, 1:max_t, df[!, i], color="#0000ff")
+        if st == nsteady
+            return res
         end
     end
-    savefig(filename)
-end
-
-#########################################
-
-max_t = 200
-n = 250
-p = 1.0
-g = erdos_renyi(n, p)
-
-for ϵ in [0.1, 0.2, 0.3, 0.4]
-
-    experiment_name = "Deffuant_$n-$ϵ-$max_t"
-    println(experiment_name)
-
-    r = deffuant(g, ϵ, max_t)
-
-    println("Loading DataFrame")
-    df = DataFrame(r)
-
-    println("Saving results")
-    CSV.write("res/$experiment_name.csv",  df, header=false)
-    spaghetti_plot(df, max_t, "plots/$experiment_name.png")
-
+    return res
 end

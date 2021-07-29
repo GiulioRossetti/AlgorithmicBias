@@ -19,7 +19,7 @@ end
 
 function population_clusters(data, ϵ)
     sort!(data)
-    start:: Float16 = v[1]
+    start:: Float16 = data[1]
     max_val:: Float16 = start + ϵ
     c = (start::Float16, Float16(max_val))
     cluster = Dict()
