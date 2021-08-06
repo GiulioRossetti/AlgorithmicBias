@@ -5,9 +5,8 @@ using StatsBase
 using ProgressBars
 
 
-
-function bias_media_iteration(g, ϵ, γ, γₘ, pₘ, media_op, old_opinions, new_opinions)
-
+function bias_media_iteration(g, ϵ, γ, γₘ, pₘ, media_op, old_opinions)
+    new_opinions = copy(old_opinions)
     for u in vertices(g)
 
         uₒ::Float16 = Float16(old_opinions[u])
@@ -49,9 +48,8 @@ function bias_media_iteration(g, ϵ, γ, γₘ, pₘ, media_op, old_opinions, ne
 end
 
 
-function deffuant_bias_media(g, ϵ, γ, γₘ, pₘ, media_op, max_t ; nsteady=10)
+function deffuant_bias_media(g, ϵ, γ, γₘ, pₘ, media_op, max_t ; nsteady=1000)
     res = []
-    st = 0
     # shared opinion arrays
     old_opinions = Array{Float16}(undef, nv(g))
     new_opinions = Array{Float16}(undef, nv(g))
@@ -62,11 +60,15 @@ function deffuant_bias_media(g, ϵ, γ, γₘ, pₘ, media_op, max_t ; nsteady=1
     end
 
     media_op = [Float16(o) for o in media_op]
-
+    
+    st = 0
     for t in ProgressBar(1:max_t)
-        new_opinions = bias_media_iteration(g, ϵ, γ, γₘ, pₘ, media_op, old_opinions, new_opinions)
-
-        is_steady(new_opinions, old_opinions) ? st += 1 : st = 0
+        new_opinions = bias_media_iteration(g, ϵ, γ, γₘ, pₘ, media_op, old_opinions)
+        if is_steady(new_opinions, old_opinions) 
+            st += 1
+        else 
+            st = 0
+        end
 
         ops = Tuple(new_opinions)
         append!(res,[ops])
