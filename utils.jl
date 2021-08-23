@@ -1,7 +1,7 @@
 using DataFrames
 using Plots
 
-function is_steady(a, b, toll=0.001)
+function is_steady(a, b, toll=0.001) 
     return all([x <= toll for x in abs.(a-b)])
 end
 
