@@ -75,7 +75,7 @@ function deffuant_bias_media(g, ϵ, γ, γₘ, pₘ, media_op, max_t ; nsteady=1
         old_opinions = new_opinions
 
         if st == nsteady
-            return res
+            return res[1:end-nsteady]
         end
 
     end
