@@ -1,2 +1,2 @@
-n,eps,gam,gam_media,p_media,max_it,media_ops,avg_nc,std_nc,avg_pwdist,std_pwdist,avg_niter,std_niter
-100, 1.0, 0.1, 0.5, 0.5, 0.1, 1000000, 0.05;0.5;0.95, 3.172395091849836, 0.5388718121996953, NaN, NaN, 91.77, 21.229317921071775
+n,p,eps,gam,gam_media,p_media,max_it,media_ops,avg_nc,std_nc,avg_pwdist,std_pwdist,avg_niter,std_niter
+100, 1.0, 0.1, 0.5, 0.5, 0.1, 1000000, 0.05;0.5;0.95, 4.19177956536038, 0.6876500984987277, 0.16478379521, 0.24933757115246166, 123.05, 32.80717308852754
