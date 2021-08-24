@@ -19,7 +19,7 @@ function bias_media_iteration(g, ϵ, γ, γₘ, pₘ, media_op, old_opinions)
             candidate_media = media_op[media_within_bound]
             # target media selection
             if size(candidate_media)[1] > 0
-                mediaₚϵ = [abs(uₒ - x)^γ for x in candidate_media]
+                mediaₚϵ = [abs(uₒ - x)^(-γ) for x in candidate_media] #cambiato segno esponente
                 mediaₚϵ /= sum(mediaₚϵ)
                 selected = sample(candidate_media, Weights(mediaₚϵ))
                 o = (selected + uₒ) / 2
@@ -31,13 +31,15 @@ function bias_media_iteration(g, ϵ, γ, γₘ, pₘ, media_op, old_opinions)
         # obtaining neighbors' opinions
         Γₚ = [old_opinions[x] for x in Γ]
         # confidence bound filtering - by ϵ
-        within_bound = [abs(uₒ - x) <= ϵ for x in Γₚ]
+        # within_bound = [abs(uₒ - x) <= ϵ for x in Γₚ] #però se io mi sono già spostato x interazione con media non va bene devo già considerare o nel calcolo dei neighbors within_bound
+        within_bound = [abs(o - x)<= ϵ for x in Γₚ]
         likeminded = Γ[within_bound]
 
         # target neighbor selection
         if size(likeminded)[1] > 0
             # biased sample by γ
-            Γₚϵ = [abs(uₒ - x)^γ for x in old_opinions[likeminded]]
+            # Γₚϵ = [abs(uₒ - x)^γ for x in old_opinions[likeminded]] #anche qua devo già considerare o dopo interazione con media
+            Γₚϵ = [abs(o - x)^(-γ) for x in old_opinions[likeminded]]
             Γₚϵ /= sum(Γₚϵ)
             selected = sample(likeminded, Weights(Γₚϵ))
             nn = Float16((old_opinions[selected] + o) / 2)
@@ -64,11 +66,8 @@ function deffuant_bias_media(g, ϵ, γ, γₘ, pₘ, media_op, max_t ; nsteady=1
     st = 0
     for t in ProgressBar(1:max_t)
         new_opinions = bias_media_iteration(g, ϵ, γ, γₘ, pₘ, media_op, old_opinions)
-        if is_steady(new_opinions, old_opinions) 
-            st += 1
-        else 
-            st = 0
-        end
+        
+        is_steady(new_opinions, old_opinions) ? st+=1 : st=0
 
         ops = Tuple(new_opinions)
         append!(res,[ops])
