@@ -2,3 +2,5 @@
 *.png
 .ipynb_checkpoints/Untitled-checkpoint.ipynb
 .vscode/settings.json
+res/
+
