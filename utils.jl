@@ -1,9 +1,8 @@
 using DataFrames
 using Plots
 
-function is_steady(a, b, toll=0.001) 
-    return all([x <= toll for x in abs.(a-b)])
-end
+is_steady(a, b, toll=0.001) = all([x <= toll for x in abs.(a - b)])
+
 
 function spaghetti_plot(df, max_t, filename)
     p = plot(1:max_t, df[!, 1], legend = false, color="#ffffff", ylims = (0,1), xlabel="Iterations", ylabel="Opinions")
