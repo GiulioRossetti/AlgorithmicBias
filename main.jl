@@ -22,20 +22,20 @@ media_op = [0.05, 0.5, 0.95]
 mos = join([string(el) for el in media_op], ";", ";")
 
 # Example Media
-for pₘ in [0.1, 0.2, 0.3, 0.4, 0.5]
+for pₘ in [0.4, 0.5, 0.6]
     for ϵ in [0.1, 0.2, 0.3, 0.4, 0.5, 1.0]
-        for γ in [0.0, 0.5, 0.75, 1, 1.25, 1.5]
+        for γ in [0.0, 0.25, 0.5, 0.75, 1.25, 1.5]
             params = [g, ϵ, γ, γ, pₘ, media_op, max_t]
             name = "media mo$media_op p$pₘ e$ϵ g$γ gm$γ mi$max_t"
-            final_opinions, final_clusters, final_its =  multiple_runs(deffuant_bias_media, name, params, nsteady; nruns=100)
-            write_aggregate(name, final_opinions, final_clusters, final_its)
-            paramvalues = "$n $p $ϵ $γ $γ $pₘ $max_t $mos"
-            writeaverages(name, paramvalues, n)
+            if isfile("final_clusters $name.json")
+                continue
+            else
+                 final_opinions, final_clusters, final_its =  multiple_runs(deffuant_bias_media, name, params, nsteady; nruns=100)
+                write_aggregate(name, final_opinions, final_clusters, final_its)
+            end
         end
     end
 end
-
-
 
 
 
