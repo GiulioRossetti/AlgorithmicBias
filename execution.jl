@@ -26,7 +26,7 @@ function write_aggregate(name, final_opinions, final_clusters, final_its)
 
 end
 
-function multiple_runs(f, name, params, nsteady; nruns)
+function multiple_runs(f, name, params, nsteady; nruns, spaghetti)
     final_opinions = Dict()
     final_clusters = Dict()
     final_its = Dict()
@@ -35,7 +35,10 @@ function multiple_runs(f, name, params, nsteady; nruns)
         r =  f(params... ; nsteady=nsteady)
         df = DataFrame(r)
         CSV.write("res/$name nr$nr.csv",  df, header=false)
-        if length(r)<params[7]/10
+        if spaghetti
+            if isfile("plots/$name nr$nr.png")
+                return
+            end
             spaghetti_plot(df, size(r)[1], "plots/$name nr$nr.png")
         end
         # aggregate stats
