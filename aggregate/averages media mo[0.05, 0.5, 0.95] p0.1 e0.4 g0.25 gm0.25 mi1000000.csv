@@ -1,2 +1,0 @@
-n,p,eps,gam,gam_media,p_media,max_it,media_ops,avg_nc,std_nc,avg_pwdist,std_pwdist,avg_niter,std_niter
-100, 1.0, 0.4, 0.25, 0.25, 0.1, 1000000, 0.05;0.5;0.95, 1.0, 0.0, 0.00011304318000000043, 0.0002506268622261231, 20705.25, 45697.73914845572
