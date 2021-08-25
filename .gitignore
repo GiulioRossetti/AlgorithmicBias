@@ -1,11 +1,5 @@
 
-*.png
-.ipynb_checkpoints/Untitled-checkpoint.ipynb
+*.ipynb
 .vscode/settings.json
 res/
-
-.ipynb_checkpoints/prove-checkpoint.ipynb
-prove.ipynb
-prove.ipynb
-prove.ipynb
-prove.ipynb
+plots/
