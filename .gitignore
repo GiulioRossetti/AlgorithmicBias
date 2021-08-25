@@ -4,3 +4,5 @@
 .vscode/settings.json
 res/
 
+.ipynb_checkpoints/prove-checkpoint.ipynb
+prove.ipynb
