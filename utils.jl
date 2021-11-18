@@ -18,7 +18,7 @@ function spaghetti_plot(df, max_t, filename)
     savefig(filename)
 end
 
-function population_clusters(data, ϵ)
+function population_clusters(data, ϵ, filename)
     sort!(data)
     start:: Float16 = data[1]
     max_val:: Float16 = start + ϵ
@@ -37,5 +37,8 @@ function population_clusters(data, ϵ)
             push!(cluster, c => 1)
         end
     end
+    x = 1:250; y = sort!(data); # These are the plotting data
+    plot(x, y, seriestype = :scatter, xlabel="Nodes", ylabel="Opinions")
+    savefig(filename)
     return cluster
 end

@@ -38,11 +38,11 @@ function multiple_runs(f, name, params, nsteady; nruns)
         # aggregate stats
         fo = r[size(r)[1]]
         ϵ = params[2]
-        clusters = population_clusters([x for x in r[end]], ϵ)
+        clusters = population_clusters([x for x in r[end]], ϵ, "plots/final_distribution $name nr$nr.png")
         merge!(final_clusters,Dict(nr=>clusters))
         merge!(final_opinions, Dict(nr=>fo))
         merge!(final_its, Dict(nr=>size(r)[1]))
-        size(r)[1] > params[7]/2 ? spaghetti = false : spaghetti_plot(df, size(r)[1], "plots/$name nr$nr.png")
+        spaghetti_plot(df, size(r)[1], "plots/$name nr$nr.png")
     end
     return final_opinions, final_clusters, final_its
 end
