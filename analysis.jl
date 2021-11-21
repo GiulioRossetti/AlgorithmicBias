@@ -76,14 +76,6 @@ function mean_and_std(array)
     return mean(array), std(array)
 end
 
-function create_averages_file()
-    header = "n,p,eps,gam,gam_media,p_media,max_it,media_ops,avg_nc,std_nc,avg_pwdist,std_pwdist,avg_niter,std_niter\n"
-    f = open("aggregate/averages media complete.csv", "a")
-    write(f, header)
-    close(f)
-end
-
-
 function writeaverages(name, params, mos, n, p)
     nca = nclusters(name, n)
     pwda = pwdists(name, n)
@@ -99,7 +91,7 @@ function writeaverages(name, params, mos, n, p)
     string = "$n $p $ϵ $γ $γ $pₘ $max_t $mos $avgnc $stdnc $avgpwd $stdpwd $avgnits $stdnits"
     list = split(string)
     s = join(list, ",")
-    f = open("aggregate/averages media complete.csv", "a")
+    f = open("aggregate/averages media $name.csv", "w")
     write(f, s)
     close(f)
 end
