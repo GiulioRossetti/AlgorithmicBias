@@ -84,7 +84,7 @@ function create_averages_file()
 end
 
 
-function writeaverages(name, params, n, p)
+function writeaverages(name, params, mos, n, p)
     nca = nclusters(name, n)
     pwda = pwdists(name, n)
     itsa = nits(name)
@@ -96,7 +96,7 @@ function writeaverages(name, params, n, p)
     pₘ = params[5]
     max_t = params[7]
     media_op = params[6]
-    string = "$n $p $ϵ $γ $γ $pₘ $max_t $media_op $avgnc $stdnc $avgpwd $stdpwd $avgnits $stdnits"
+    string = "$n $p $ϵ $γ $γ $pₘ $max_t $mos $avgnc $stdnc $avgpwd $stdpwd $avgnits $stdnits"
     list = split(string)
     s = join(list, ",")
     f = open("aggregate/averages media complete.csv", "a")
