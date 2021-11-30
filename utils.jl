@@ -1,6 +1,14 @@
 using DataFrames
 using Plots
 
+function read_json(file)
+    open(file,"r") do f
+        global inDict
+        inDict = JSON.parse(f)
+    end
+    return inDict
+end
+
 is_steady(a, b, toll=0.001) = all([x <= toll for x in abs.(a - b)])
 
 
@@ -37,7 +45,7 @@ function population_clusters(data, ϵ, filename)
             push!(cluster, c => 1)
         end
     end
-    x = 1:250; y = sort!(data); # These are the plotting data
+    x = 1:100; y = sort(data); # These are the plotting data
     plot(x, y, seriestype = :scatter, xlabel="Nodes", ylabel="Opinions")
     savefig(filename)
     return cluster

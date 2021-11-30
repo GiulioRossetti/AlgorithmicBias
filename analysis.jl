@@ -25,7 +25,7 @@ function nclusters(name, n)
             C = C_num / C_den
             append!(ncarray, [C])
         end
-        f = open("aggregate/enc $name.csv", "w")
+        f = open("aggregate/enc $name.csv", "a")
         s = join([string(el) for el in ncarray], ",")
         write(f, s)
         close(f)
