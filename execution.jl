@@ -12,11 +12,14 @@ using Statistics
 function multiple_runs(f, name, params, nsteady; nruns)
     for nr in 1:nruns
         if isfile("res/$name nr$nr.csv")
+            println("execution number $nr already present for params: $params")
             continue
         else
+            print("execution number $nr missing for params: $params")
             r =  f(params... ; nsteady=nsteady)
             df = DataFrame(r)
             CSV.write("res/$name nr$nr.csv",  df, header=false)
+        end
     end
 end
 
@@ -53,10 +56,12 @@ function return_dictionaries(f, name, params; nruns)
         if string(nr) in keys(final_clusters)
             continue
         else
+            println("run missing from aggregate file: searching for past execution")
             resfile = "res/$name nr$nr.csv"
             if isfile(resfile)
                 r = readres(resfile)
             else
+                println("Runfile missing: starting new runs")
                 multiple_runs(f, name, params, nsteady; nruns)
                 r = readres(resfile)
             end
@@ -72,6 +77,7 @@ function return_dictionaries(f, name, params; nruns)
 end
 
 function write_aggregate(name, final_opinions, final_clusters, final_its)
+    println("writing aggregate files")
     json_string = JSON.json(final_clusters)
     open("aggregate/final_clusters $name.json","w") do f
         write(f, json_string)
@@ -84,25 +90,32 @@ function write_aggregate(name, final_opinions, final_clusters, final_its)
     open("aggregate/final_iterations $name.json","w") do f
         write(f, json_string)
     end
+    println("done")
 end
 
 function plotting(name; nruns)
+    println("plotting function entered")
     spaghetti=true; finaldist = true
     for nr in 1:nruns
         if isfile("plots/$name nr$nr.png")
+            println("evolution already plotted")
             spaghetti = false
         end
         if isfile("plots/final_distribution $name nr$nr.png")
+            println("final distribution already plotted")
             finaldist = false
         end
         resfile = "res/$name nr$nr.csv"
         if isfile(resfile)
+            println("result file exists")
             r = readres(resfile)
             df = DataFrame(r)
             if finaldist
+                println("plotting final opinion distribution")
                 final_dist_plot(r, "plots/final_distribution $name nr$nr.png")
             end
             if spaghetti
+                println("plotting evolution")
                 spaghetti_plot(df, size(r)[1], "plots/$name nr$nr.png")
             end
         else

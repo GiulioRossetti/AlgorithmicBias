@@ -34,7 +34,7 @@ function final_dist_plot(r, filename)
     x = 1:100; y = sort([x for x in r[end]]); # These are the plotting data
     plot(x, y, seriestype = :scatter, xlabel="Nodes", ylabel="Opinions")
     savefig(filename)
-
+end
 function population_clusters(data, ϵ)
     sort!(data)
     start:: Float16 = data[1]
