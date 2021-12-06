@@ -23,11 +23,24 @@ nsteady = 1000
 media_op = [0.05, 0.5, 0.95]
 mos = join([string(el) for el in media_op], ";", ";")
 
-# Example Media
+f = deffuant_bias_media
+
+# Populate res folder first
 for pₘ in [0.1], ϵ in [0.2], γ in [0.0]
     params = [g, ϵ, γ, γ, pₘ, media_op, max_t]
     name = "media mo$media_op p$pₘ e$ϵ g$γ gm$γ mi$max_t"
-    final_opinions, final_clusters, final_its =  multiple_runs(deffuant_bias_media, name, params, nsteady; nruns=100)
-    write_aggregate(name, final_opinions, final_clusters, final_its)
-    writeaverages(name, params, mos, n, p)
+    multiple_runs(f, name, params, nsteady; nruns=100)
 end
+
+#Populate aggregate folder
+for pₘ in [0.1], ϵ in [0.2], γ in [0.0]
+    params = [g, ϵ, γ, γ, pₘ, media_op, max_t]
+    name = "media mo$media_op p$pₘ e$ϵ g$γ gm$γ mi$max_t"
+    final_opinions, final_clusters, final_its = return_dictionaries(f, name, params; nruns)
+    write_aggregate(name, final_opinions, final_clusters, final_its)
+
+#Make plots
+for pₘ in [0.1], ϵ in [0.2], γ in [0.0]
+    params = [g, ϵ, γ, γ, pₘ, media_op, max_t]
+    name = "media mo$media_op p$pₘ e$ϵ g$γ gm$γ mi$max_t"
+    plotting(name; nruns)

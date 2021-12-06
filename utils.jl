@@ -1,5 +1,9 @@
 using DataFrames
 using Plots
+using CSV
+using JSON
+using LightGraphs
+using Statistics
 
 function read_json(file)
     open(file,"r") do f
@@ -26,7 +30,12 @@ function spaghetti_plot(df, max_t, filename)
     savefig(filename)
 end
 
-function population_clusters(data, ϵ, filename)
+function final_dist_plot(r, filename)
+    x = 1:100; y = sort([x for x in r[end]]); # These are the plotting data
+    plot(x, y, seriestype = :scatter, xlabel="Nodes", ylabel="Opinions")
+    savefig(filename)
+
+function population_clusters(data, ϵ)
     sort!(data)
     start:: Float16 = data[1]
     max_val:: Float16 = start + ϵ
@@ -45,8 +54,5 @@ function population_clusters(data, ϵ, filename)
             push!(cluster, c => 1)
         end
     end
-    x = 1:100; y = sort(data); # These are the plotting data
-    plot(x, y, seriestype = :scatter, xlabel="Nodes", ylabel="Opinions")
-    savefig(filename)
     return cluster
 end
