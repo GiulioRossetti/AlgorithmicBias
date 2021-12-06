@@ -1,7 +1,7 @@
 include("deffuant.jl")
 include("bias.jl")
 include("media.jl")
-include("functiontest.jl")
+include("utils.jl")
 
 using CSV
 using DataFrames
