@@ -1,5 +1,2 @@
-
-*.ipynb
-.vscode/settings.json
-res/
 plots/
+res/
