@@ -2,6 +2,13 @@ using JSON
 using Statistics
 using CSV
 using Tables
+using DataFrames
+using LightGraphs
+
+include("deffuant.jl")
+include("bias.jl")
+include("media.jl")
+include("utils.jl")
 
 function keys_to_int(dict)
     newdict = Dict([parse(Int, string(key)) => val for (key, val) in pairs(dict)])
