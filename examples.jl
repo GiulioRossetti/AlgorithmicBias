@@ -19,7 +19,7 @@ g = erdos_renyi(n, p)
 # simulation global parameters
 max_t = 1000000
 nsteady = 1000
-nruns = 10
+nruns = 100
 
 # Prova file che non esiste -> nruns tutte ancora da fare, non ci sono res file, non ci sono aggregate file: sembrerebbe ok
 
@@ -49,7 +49,7 @@ nruns = 10
 #     final_opinions, final_clusters, final_its = return_dictionaries(f, name, params; nruns)
 #     write_aggregate(name, final_opinions, final_clusters, final_its)
 
-#Make plots: forse i plot meglio farli dopo con python che mi vengono meglio
+# # Make plots: forse i plot meglio farli dopo con python che mi vengono meglio
 # for pₘ in [0.1], ϵ in [0.2], γ in [0.7]
 #     media_op = [0.0]
 #     mos = join([string(el) for el in media_op], ";", ";")
