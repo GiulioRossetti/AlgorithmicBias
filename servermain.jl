@@ -41,6 +41,7 @@ for pₘ in [0.3, 0.4, 0.5], ϵ in [0.1, 0.2, 0.3, 0.4, 0.5, 1.0], γ in [0.0, 0
     params = [g, ϵ, γ, γ, pₘ, media_op, max_t]
     name = "media mo$media_op p$pₘ e$ϵ g$γ gm$γ mi$max_t"
     final_opinions, final_clusters, final_its = return_dictionaries(f, name, params; nruns)
+    println("writing aggregate files")
     write_aggregate(name, final_opinions, final_clusters, final_its)
 end
 
