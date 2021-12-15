@@ -34,6 +34,7 @@ nruns = 3
 # end
 
 # Example Media
+
 for pₘ in [0.3, 0.4, 0.5], ϵ in [0.1, 0.2, 0.3, 0.4, 0.5, 1.0], γ in [0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5]
     f = deffuant_bias_media
     media_op = [0.05, 0.5, 0.95]
