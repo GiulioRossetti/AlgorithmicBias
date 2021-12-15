@@ -60,11 +60,15 @@ function return_dictionaries(f, name, params; nruns)
             println("run missing from aggregate file: searching for $name nr$nr")
             resfile = "res/$name nr$nr.csv"
             if isfile(resfile)
+                println("runfile found: reading results")
                 r = readres(resfile)
+                println("read results")
             else
                 println("Runfile missing: starting new runs")
                 multiple_runs(f, name, params, nsteady; nruns)
+                println("execution ended")
                 r = readres(resfile)
+                println("read results")
             end
         end
         fo = r[size(r)[1]]
