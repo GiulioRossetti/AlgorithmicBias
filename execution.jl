@@ -57,7 +57,7 @@ function return_dictionaries(f, name, params; nruns)
         if string(nr) in keys(final_clusters)
             continue
         else
-            println("run missing from aggregate file: searching for past execution")
+            println("run missing from aggregate file: searching for $name nr$nr")
             resfile = "res/$name nr$nr.csv"
             if isfile(resfile)
                 r = readres(resfile)
