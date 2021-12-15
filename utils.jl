@@ -1,5 +1,6 @@
 using DataFrames
 using Plots
+# using PyPlot
 using CSV
 using JSON
 using LightGraphs
@@ -31,10 +32,14 @@ function spaghetti_plot(df, max_t, filename)
 end
 
 function final_dist_plot(r, filename)
-    x = 1:100; y = sort([x for x in r[end]]); # These are the plotting data
-    plot(x, y, seriestype = :scatter, xlabel="Nodes", ylabel="Opinions")
+    x = 1:100 
+    r = [x for x in r[end]]
+    sort!(r)
+    plot(x, r, seriestype = :scatter, color="blue",  xlabel="Nodes", ylabel="Opinions")
+    plot!(xlims=(0,101), ylims=(0.0, 1.0))
     savefig(filename)
 end
+
 function population_clusters(data, ϵ)
     sort!(data)
     start:: Float16 = data[1]
