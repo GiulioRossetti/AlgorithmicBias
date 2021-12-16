@@ -19,7 +19,7 @@ g = erdos_renyi(n, p)
 # simulation global parameters
 max_t = 1000000
 nsteady = 1000
-nruns = 5
+nruns = 3
 
 
 # # Example Media
