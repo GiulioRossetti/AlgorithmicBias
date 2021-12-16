@@ -101,31 +101,28 @@ end
 function plotting(name; nruns)
     println("plotting function entered")
     spaghetti=true; finaldist = true
-    for nr in 1:nruns
-        if isfile("plots/$name nr$nr.png")
-            println("evolution already plotted")
-            spaghetti = false
+    nr = 1
+    if isfile("plots/evolution/$name nr$nr.png")
+        println("evolution already plotted")
+        spaghetti = false
+    end
+    if isfile("plots/finaldistribution/final_distribution $name nr$nr.png")
+        println("final distribution already plotted")
+        finaldist = false
+    end
+    resfile = "res/$name nr$nr.csv"
+    if isfile(resfile)
+        println("result file exists")
+        r = readres(resfile)
+        df = DataFrame(r)
+        if finaldist
+            println("plotting final opinion distribution")
+            final_dist_plot(r, "plots/finaldistribution/final_distribution $name nr$nr.png")
         end
-        if isfile("plots/final_distribution $name nr$nr.png")
-            println("final distribution already plotted")
-            finaldist = false
-        end
-        resfile = "res/$name nr$nr.csv"
-        if isfile(resfile)
-            println("result file exists")
-            r = readres(resfile)
-            df = DataFrame(r)
-            if finaldist
-                println("plotting final opinion distribution")
-                final_dist_plot(r, "plots/final_distribution $name nr$nr.png")
-            end
-            if spaghetti
-                println("plotting evolution")
-                spaghetti_plot(df, size(r)[1], "plots/$name nr$nr.png")
-            end
-        else
-            continue
-        end
+        if spaghetti
+            println("plotting evolution")
+            spaghetti_plot(df, size(r)[1], "plots/evolution/$name nr$nr.png")
+        end   
     end
 end
 
