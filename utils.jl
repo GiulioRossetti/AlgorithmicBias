@@ -1,10 +1,13 @@
 using DataFrames
 using Plots
-# using PyPlot
 using CSV
 using JSON
 using LightGraphs
 using Statistics
+using PyCall
+
+np = pyimport("numpy")
+stats = pyimport("scipy.stats")
 
 function keys_to_int(dict)
     newdict = Dict([parse(Int, string(key)) => val for (key, val) in pairs(dict)])
@@ -39,7 +42,6 @@ is_steady(a, b, toll=0.001) = all([x <= toll for x in abs.(a - b)])
 function mean_and_std(array)
     return mean(array), std(array)
 end
-
 
 function spaghetti_plot(df, max_t, filename)
     p = plot(1:max_t, df[!, 1], legend = false, color="#ffffff", ylims = (0,1), xlabel="Iterations", ylabel="Opinions")
@@ -84,4 +86,81 @@ function population_clusters(data, ϵ)
         end
     end
     return cluster
+end
+
+function nclusters(name, n)
+    if isfile("aggregate/final_clusters $name.json")
+        open("aggregate/final_clusters $name.json", "r") do f
+            global filedict
+            filedict = JSON.parse(f)  # parse and transform data
+        end
+        clusters = keys_to_int(filedict)
+        ncarray = []
+        for nr in keys(clusters)
+            C_num = n*n
+            C_den = 0
+            for k in keys(clusters[nr])
+                C_den += clusters[nr][k]*clusters[nr][k]
+            end
+            C = C_num / C_den
+            append!(ncarray, [C])
+        end
+        return ncarray
+    end
+end
+
+function pwdists(name, n)
+    if isfile("aggregate/final_opinions $name.json")
+        open("aggregate/final_opinions $name.json", "r") do f
+            global filedict
+            filedict = JSON.parse(f)  # parse and transform data
+        end
+        opinions = keys_to_int(filedict)
+        
+        pwdarray = zeros(Float64, length(opinions), n, n)
+        for nr in keys(opinions)
+            for i in 1:n
+                o_i = opinions[nr][i]
+                for j in i:n
+                    o_j = opinions[nr][j]
+                    d = abs.(o_i-o_j)
+                    pwdarray[nr, i, j] = d
+                end
+            end
+        end
+        return pwdarray
+    end
+end
+
+function nits(name)
+    if isfile("aggregate/final_iterations $name.json")
+        open("aggregate/final_iterations $name.json", "r") do f
+            global filedict
+            filedict = JSON.parse(f)  # parse and transform data
+        end
+        iterations = keys_to_int(filedict)
+        
+        itarray = []
+        for nr in keys(iterations)
+            append!(itarray, iterations[nr])
+        end
+        return itarray
+    end
+end
+
+function entropy(name)
+    if isfile("aggregate/final_opinions $name.json")
+        infile = open("aggregate/final_opinions $name.json")
+        filedict = read_json(infile)        
+        fodict = keys_to_int(filedict)
+        entropy_arr = []
+        for nr in keys(fodict)
+            opinions = list(filedict[nr])
+            bincount= np.histogram(opinions, bins = np.linspace(0, 1, 11))
+            probabilities = bincount/100
+            entr = stats.entropy(probabilities)
+            append(entropy_arr, entr)
+        end
+        return entropy_arr
+    end
 end
