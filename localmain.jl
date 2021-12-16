@@ -44,26 +44,26 @@ nruns = 5
 #     write_aggregate(name, final_opinions, final_clusters, final_its)
 # end
 
+# for pₘ in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5], ϵ in [0.1, 0.2, 0.3, 0.4, 0.5, 1.0], γ in [0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5]
+#     f = deffuant_bias_media
+#     media_op = [0.05, 0.5, 0.95]
+#     mos = join([string(el) for el in media_op], ";", ";")
+#     params = [g, ϵ, γ, γ, pₘ, media_op, max_t]
+#     name = "media mo$media_op p$pₘ e$ϵ g$γ gm$γ mi$max_t"
+#     # final_opinions, final_clusters, final_its = return_dictionaries(f, name, params; nruns)
+#     writeaverages(name, params, mos, n, p)
+# end
+
+
+# # Make plots: forse i plot meglio farli dopo con python che mi vengono meglio
 for pₘ in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5], ϵ in [0.1, 0.2, 0.3, 0.4, 0.5, 1.0], γ in [0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5]
     f = deffuant_bias_media
     media_op = [0.05, 0.5, 0.95]
     mos = join([string(el) for el in media_op], ";", ";")
     params = [g, ϵ, γ, γ, pₘ, media_op, max_t]
     name = "media mo$media_op p$pₘ e$ϵ g$γ gm$γ mi$max_t"
-    # final_opinions, final_clusters, final_its = return_dictionaries(f, name, params; nruns)
-    writeaverages(name, params, mos, n, p)
+    plotting(name; nruns)
 end
-
-
-# # Make plots: forse i plot meglio farli dopo con python che mi vengono meglio
-# for pₘ in [0.1], ϵ in [0.2], γ in [0.7]
-#     media_op = [0.0]
-#     mos = join([string(el) for el in media_op], ";", ";")
-#     println("plotting process started")
-#     params = [g, ϵ, γ, γ, pₘ, media_op, max_t]
-#     name = "media mo$media_op p$pₘ e$ϵ g$γ gm$γ mi$max_t"
-#     plotting(name; nruns)
-# end
 
 
 
