@@ -6,6 +6,11 @@ using JSON
 using LightGraphs
 using Statistics
 
+function keys_to_int(dict)
+    newdict = Dict([parse(Int, string(key)) => val for (key, val) in pairs(dict)])
+    return newdict
+end
+
 function read_json(file)
     open(file,"r") do f
         global inDict
@@ -14,7 +19,26 @@ function read_json(file)
     return inDict
 end
 
+
+function readres(resfile)
+    csv_reader = CSV.File(resfile, header=false)
+    r = Vector{Any}()
+    for row in csv_reader
+        opinions=Vector{Float16}()
+        for el in row
+            append!(opinions, el)
+            global ops = Tuple(opinions)
+        end
+        append!(r, [ops])
+    end
+    return r
+end
+
 is_steady(a, b, toll=0.001) = all([x <= toll for x in abs.(a - b)])
+
+function mean_and_std(array)
+    return mean(array), std(array)
+end
 
 
 function spaghetti_plot(df, max_t, filename)

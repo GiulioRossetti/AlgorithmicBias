@@ -2,7 +2,7 @@ include("execution.jl")
 include("deffuant.jl")
 include("bias.jl")
 include("media.jl")
-include("analysis.jl")
+include("aggregate.jl")
 
 ENV["GKSwstype"]="nul"
 
