@@ -4,24 +4,44 @@ using CSV
 using JSON
 using LightGraphs
 using Statistics
-using PyCall
+# using PyCall
 
-np = pyimport("numpy")
-stats = pyimport("scipy.stats")
+# np = pyimport("numpy")
+# stats = pyimport("scipy.stats")
 
 function keys_to_int(dict)
-    newdict = Dict([parse(Int, string(key)) => val for (key, val) in pairs(dict)])
+    newdict = Dict([parse(Int, string(key)) => val for (key, val) in pairs(dict)])    
     return newdict
 end
 
-function read_json(file)
-    open(file,"r") do f
-        global inDict
-        inDict = JSON.parse(f)
-    end
+function splitstring(s)
+    v = split(s, r"\(|\)")
+    n1 = parse(Float16, v[3])
+    n2 =  parse(Float16, v[5])
+    return Tuple([Float16(n1), Float16(n2)])
+end
+
+function keys_to_tuple(dict)
+    newdict = Dict([splitstring(key) => val for (key, val) in pairs(dict)])    
+    return newdict
+end
+
+function read_json(filename)
+    inDict = JSON.parsefile(filename)
     return inDict
 end
 
+function read_json_cluster(filename)
+    inDict = JSON.parsefile(filename)
+    newdict = keys_to_int(inDict)
+    newnewdict = Dict()
+    for nr in keys(newdict)
+        newnewdict[nr] = Dict()
+        dicttoadd = keys_to_tuple(newdict[nr])
+        newnewdict[nr] = dicttoadd
+    end
+    return newnewdict
+end
 
 function readres(resfile)
     csv_reader = CSV.File(resfile, header=false)
@@ -66,11 +86,33 @@ function final_dist_plot(r, filename)
     savefig(filename)
 end
 
+# function population_clusters(data, ϵ)
+#     sort!(data)
+#     start:: Float16 = data[1]
+#     max_val:: Float16 = start + ϵ
+#     c = (start::Float16, Float16(max_val))
+#     cluster = Dict()
+#     for i in data
+#         if i <= max_val
+#             if c in keys(cluster)
+#                 push!(cluster, c => cluster[c]+1)
+#             else
+#                 push!(cluster, c => 1)
+#             end
+#         else
+#             max_val = Float16(i + ϵ)
+#             c = (i::Float16, Float16(max_val))
+#             push!(cluster, c => 1)
+#         end
+#     end
+#     return cluster
+# end
+
 function population_clusters(data, ϵ)
     sort!(data)
-    start:: Float16 = data[1]
-    max_val:: Float16 = start + ϵ
-    c = (start::Float16, Float16(max_val))
+    start = data[1]
+    max_val = start + ϵ
+    c = (start, max_val)
     cluster = Dict()
     for i in data
         if i <= max_val
@@ -80,8 +122,8 @@ function population_clusters(data, ϵ)
                 push!(cluster, c => 1)
             end
         else
-            max_val = Float16(i + ϵ)
-            c = (i::Float16, Float16(max_val))
+            max_val = i + ϵ
+            c = (i, max_val)
             push!(cluster, c => 1)
         end
     end
@@ -148,19 +190,19 @@ function nits(name)
     end
 end
 
-function entropy(name)
-    if isfile("aggregate/final_opinions $name.json")
-        infile = open("aggregate/final_opinions $name.json")
-        filedict = read_json(infile)        
-        fodict = keys_to_int(filedict)
-        entropy_arr = []
-        for nr in keys(fodict)
-            opinions = list(filedict[nr])
-            bincount= np.histogram(opinions, bins = np.linspace(0, 1, 11))
-            probabilities = bincount/100
-            entr = stats.entropy(probabilities)
-            append(entropy_arr, entr)
-        end
-        return entropy_arr
-    end
-end
+# function entropy(name)
+#     if isfile("aggregate/final_opinions $name.json")
+#         infile = open("aggregate/final_opinions $name.json")
+#         filedict = read_json(infile)        
+#         fodict = keys_to_int(filedict)
+#         entropy_arr = []
+#         for nr in keys(fodict)
+#             opinions = list(filedict[nr])
+#             bincount= np.histogram(opinions, bins = np.linspace(0, 1, 11))
+#             probabilities = bincount/100
+#             entr = stats.entropy(probabilities)
+#             append(entropy_arr, entr)
+#         end
+#         return entropy_arr
+#     end
+# end

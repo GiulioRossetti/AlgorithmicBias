@@ -16,7 +16,7 @@ function return_dictionaries(f, name, params; nruns)
 
     function create_dictionaries()
         if isfile("aggregate/final_clusters $name.json")
-            final_clusters = read_json("aggregate/final_clusters $name.json")
+            final_clusters = read_json_cluster("aggregate/final_clusters $name.json")
             final_opinions = read_json("aggregate/final_opinions $name.json")
             final_its = read_json("aggregate/final_iterations $name.json")
         else
@@ -24,13 +24,18 @@ function return_dictionaries(f, name, params; nruns)
             final_opinions = Dict()
             final_its = Dict()
         end
-        return keys_to_int(final_clusters), keys_to_int(final_opinions), keys_to_int(final_its)
+        return final_clusters,final_opinions, final_its
     end
 
     final_clusters, final_opinions, final_its = create_dictionaries()
     
+    fc = final_clusters
+    fo = keys_to_int(final_opinions)
+    fi = keys_to_int(final_its)
+
     for nr in 1:nruns
-        if nr in keys(final_clusters)
+        if nr in keys(fc)
+            println(nr)
             continue
         else
             resfile = "res/$name nr$nr.csv"
@@ -44,11 +49,11 @@ function return_dictionaries(f, name, params; nruns)
         fo = r[size(r)[1]]
         ϵ = params[2]
         clusters = population_clusters([x for x in r[end]], ϵ)
-        merge!(final_clusters,Dict((nr)=>clusters))
-        merge!(final_opinions, Dict((nr)=>fo))
-        merge!(final_its, Dict((nr)=>size(r)[1]))
+        merge!(fc,Dict(nr=>clusters))
+        merge!(fo, Dict(nr=>fo))
+        merge!(fi, Dict(nr=>size(r)[1]))
     end
-    return final_opinions, final_clusters, final_its
+    return fo, fc, fi
 end
 
 function write_aggregate(name, final_opinions, final_clusters, final_its)
@@ -72,13 +77,13 @@ function writeaverages(name, params, mos, n, p)
     nca = nclusters(name, n)
     pwda = pwdists(name, n)
     itsa = nits(name)
-    entra = entropy(name) 
+    # entra = entropy(name) 
     avgnc, stdnc = mean_and_std(nca)
     avgpwd, stdpwd = mean_and_std(pwda) 
     avgnits, stdnits = mean_and_std(itsa)
-    avgentr, stdentr = mean_and_std(entra)
+    # avgentr, stdentr = mean_and_std(entra)
     ϵ = params[2]; γ = params[3]; pₘ = params[5]; max_t = params[7]
-    string = "$n $p $ϵ $γ $γ $pₘ $max_t $mos $avgnc $stdnc $avgpwd $stdpwd $avgnits $stdnits $avgentr $stdentr"
+    string = "$n $p $ϵ $γ $γ $pₘ $max_t $mos $avgnc $stdnc $avgpwd $stdpwd $avgnits $stdnits"
     list = split(string)
     s = join(list, ",")
     f = open("aggregate/averages media $name.csv", "w")
