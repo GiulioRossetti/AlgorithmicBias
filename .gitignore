@@ -1,4 +1,6 @@
-plots/
+plots/evolution/
+plots/finaldistribution/
 res/
-localmain.jl
+.vscode/
+.ipynb_checkpoints/
 autocommit.bat
