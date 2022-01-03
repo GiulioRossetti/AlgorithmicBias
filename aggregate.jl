@@ -46,11 +46,11 @@ function return_dictionaries(f, name, params; nruns)
                 r = readres(resfile)
             end
         end
-        fo = r[size(r)[1]]
+        o = r[size(r)[1]]
         ϵ = params[2]
-        clusters = population_clusters([x for x in r[end]], ϵ)
+        clusters = population_clusters([x for x in r[end]])
         merge!(fc,Dict(nr=>clusters))
-        merge!(fo, Dict(nr=>fo))
+        merge!(fo, Dict(nr=>o))
         merge!(fi, Dict(nr=>size(r)[1]))
     end
     return fo, fc, fi
@@ -78,10 +78,9 @@ function writeaverages(name, params, mos, n, p)
     pwda = pwdists(name, n)
     itsa = nits(name)
     # entra = entropy(name) 
-    avgnc, stdnc = mean_and_std(nca)
-    avgpwd, stdpwd = mean_and_std(pwda) 
-    avgnits, stdnits = mean_and_std(itsa)
-    # avgentr, stdentr = mean_and_std(entra)
+    avgnc, stdnc = avg_and_std(nca)
+    avgpwd, stdpwd = avg_and_std(pwda) 
+    avgnits, stdnits = avg_and_std(itsa)
     ϵ = params[2]; γ = params[3]; pₘ = params[5]; max_t = params[7]
     string = "$n $p $ϵ $γ $γ $pₘ $max_t $mos $avgnc $stdnc $avgpwd $stdpwd $avgnits $stdnits"
     list = split(string)
@@ -91,10 +90,8 @@ function writeaverages(name, params, mos, n, p)
     close(f)
 end
 
-function plotting(name; nruns)
-    println("plotting function entered")
-    spaghetti=true; finaldist = true
-    nr = 1
+function plotting(f, name, params, nsteady, nr; spaghetti::Bool=false, finaldist::Bool=true)
+    # println("plotting $name")
     if isfile("plots/evolution/$name nr$nr.png")
         spaghetti = false
     end
@@ -111,6 +108,9 @@ function plotting(name; nruns)
         if spaghetti
             spaghetti_plot(df, size(r)[1], "plots/evolution/$name nr$nr.png")
         end   
+    else
+        println("$resfile running")
+        multiple_runs(f, name, params, nsteady; nr)
     end
 end
 

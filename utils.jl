@@ -108,10 +108,32 @@ end
 #     return cluster
 # end
 
-function population_clusters(data, ϵ)
+# function population_clusters(data, ϵ)
+#     sort!(data)
+#     start = data[1]
+#     max_val = start + ϵ
+#     c = (start, max_val)
+#     cluster = Dict()
+#     for i in data
+#         if i <= max_val
+#             if c in keys(cluster)
+#                 push!(cluster, c => cluster[c]+1)
+#             else
+#                 push!(cluster, c => 1)
+#             end
+#         else
+#             max_val = i + ϵ
+#             c = (i, max_val)
+#             push!(cluster, c => 1)
+#         end
+#     end
+#     return cluster
+# end
+
+function population_clusters(data, threshold=0.01)
     sort!(data)
     start = data[1]
-    max_val = start + ϵ
+    max_val = start + threshold
     c = (start, max_val)
     cluster = Dict()
     for i in data
@@ -122,7 +144,7 @@ function population_clusters(data, ϵ)
                 push!(cluster, c => 1)
             end
         else
-            max_val = i + ϵ
+            max_val = i + threshold
             c = (i, max_val)
             push!(cluster, c => 1)
         end
