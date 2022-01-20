@@ -59,7 +59,7 @@ end
 
 is_steady(a, b, toll=0.001) = all([x <= toll for x in abs.(a - b)])
 
-function mean_and_std(array)
+function avg_and_std(array)
     return mean(array), std(array)
 end
 
@@ -133,7 +133,8 @@ end
 function population_clusters(data, threshold=0.01)
     sort!(data)
     start = data[1]
-    max_val = start + threshold
+    max_val = start + Float16(threshold)
+    max_val = Float16(max_val)
     c = (start, max_val)
     cluster = Dict()
     for i in data
@@ -145,6 +146,7 @@ function population_clusters(data, threshold=0.01)
             end
         else
             max_val = i + threshold
+            max_val = Float16(max_val)
             c = (i, max_val)
             push!(cluster, c => 1)
         end
