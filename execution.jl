@@ -19,7 +19,7 @@ function multiple_runs(f, name, params, nsteady; nruns)
             r =  f(params... ; nsteady=nsteady)
             df = DataFrame(r)
             CSV.write("res/$name nr$nr.csv",  df, header=false)
-            CSV.write("res/final_opinions $name nr$nr.csv",  Tables.table([el for el in r[size(r)[1]]]), header=false, delim=',')
+            # CSV.write("res/final_opinions $name nr$nr.csv",  Tables.table([el for el in r[size(r)[1]]]), header=false, delim=',')
         end
     end
 end

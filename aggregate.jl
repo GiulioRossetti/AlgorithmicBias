@@ -12,14 +12,47 @@ include("media.jl")
 include("utils.jl")
 include("execution.jl")
 
+function checkifruns(f, name, params; nruns)
+    # if isfile("aggregate/final_clusters $name.json")
+    #     final_clusters = read_json_cluster("aggregate/final_clusters $name.json")
+    #     final_opinions = read_json("aggregate/final_opinions $name.json")
+    #     final_its = read_json("aggregate/final_iterations $name.json")
+    # else
+    #     println("final_clusters $name.json does not exist")
+    #     return
+    # end
+
+    # fc = final_clusters
+    # fo = keys_to_int(final_opinions)
+    # fi = keys_to_int(final_its)
+    for nr in 1:nruns
+        # if nr in keys(fc)
+        #     println(nr)
+        #     continue
+        # else
+        # println("missing runs in final_clusters $name.json")
+        resfile = "res/$name nr$nr.csv"
+        if isfile(resfile)
+            continue
+        else
+            println("missing run $name $nr")
+            # multiple_runs(f, name, params, nsteady; nruns)
+        end
+        # end
+    end
+end
+
+
 function return_dictionaries(f, name, params; nruns)
 
     function create_dictionaries()
         if isfile("aggregate/final_clusters $name.json")
+            println("aggregate files already existing")
             final_clusters = read_json_cluster("aggregate/final_clusters $name.json")
             final_opinions = read_json("aggregate/final_opinions $name.json")
             final_its = read_json("aggregate/final_iterations $name.json")
         else
+            println("aggregate files not present")
             final_clusters = Dict()
             final_opinions = Dict()
             final_its = Dict()
@@ -56,36 +89,44 @@ function return_dictionaries(f, name, params; nruns)
     return fo, fc, fi
 end
 
-function write_aggregate(name, final_opinions, final_clusters, final_its)
-    println("writing aggregate files")
-    json_string = JSON.json(final_clusters)
-    open("aggregate/final_clusters $name.json","w") do f
-        write(f, json_string)
-    end
-    json_string = JSON.json(final_opinions)
-    open("aggregate/final_opinions $name.json","w") do f
-        write(f, json_string)
-    end
-    json_string = JSON.json(final_its)
-    open("aggregate/final_iterations $name.json","w") do f
-        write(f, json_string)
-    end
-    println("done")
-end
+# function write_aggregate(name, final_opinions, final_clusters, final_its)
+#     println("writing aggregate files")
 
-function writeaverages(name, params, mos, n, p)
-    nca = nclusters(name, n)
-    pwda = pwdists(name, n)
-    itsa = nits(name)
-    # entra = entropy(name) 
-    avgnc, stdnc = avg_and_std(nca)
-    avgpwd, stdpwd = avg_and_std(pwda) 
-    avgnits, stdnits = avg_and_std(itsa)
+#     json_string = JSON.json(final_clusters)
+#     open("aggregate/final_clusters $name.json","w") do f
+#         println("doing final_clusters $name.json")
+#         write(f, json_string)
+#     end
+    
+#     json_string = JSON.json(final_opinions)
+#     open("aggregate/final_opinions $name.json","w") do f
+#         println("doing final_opinions $name.json")
+#         write(f, json_string)
+#     end
+
+#     json_string = JSON.json(final_its)
+#     open("aggregate/final_iterations $name.json","w") do f
+#         println("doing final_iterations $name.json")
+#         write(f, json_string)
+#     end
+
+#     println("done with final_*$name.json")
+# end
+
+function writeaverages(model, name, params, mos, n, p)
+    # nca = nclusters(name, n)
+    # pwda = pwdists(name, n)
+    # itsa = nits(name)
+    # # entra = entropy(name) 
+    # avgnc, stdnc = mean_and_std(nca)
+    # avgpwd, stdpwd = mean_and_std(pwda) 
+    # avgnits, stdnits = mean_and_std(itsa)
     ϵ = params[2]; γ = params[3]; pₘ = params[5]; max_t = params[7]
-    string = "$n $p $ϵ $γ $γ $pₘ $max_t $mos $avgnc $stdnc $avgpwd $stdpwd $avgnits $stdnits"
+    # string = "$n $p $ϵ $γ $γ $pₘ $max_t $mos $avgnc $stdnc $avgpwd $stdpwd $avgnits $stdnits"
+    string = "$n $p $ϵ $γ $γ $pₘ $max_t $mos"
     list = split(string)
     s = join(list, ",")
-    f = open("aggregate/averages media $name.csv", "w")
+    f = open("aggregate/averages $model $name.csv", "w")
     write(f, s)
     close(f)
 end
