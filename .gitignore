@@ -1,6 +1,6 @@
-plots/evolution/
-plots/finaldistribution/
+plots/
 res/
 .vscode/
 .ipynb_checkpoints/
 autocommit.bat
+.gitignore.txt
