@@ -57,14 +57,14 @@ function return_dictionaries(f, name, params; nruns)
             final_opinions = Dict()
             final_its = Dict()
         end
-        return final_clusters,final_opinions, final_its
+        return final_clusters,keys_to_int(final_opinions), keys_to_int(final_its)
     end
 
     final_clusters, final_opinions, final_its = create_dictionaries()
     
     fc = final_clusters
-    fo = keys_to_int(final_opinions)
-    fi = keys_to_int(final_its)
+    fo = final_opinions
+    fi = final_its
 
     for nr in 1:nruns
         if nr in keys(fc)
@@ -79,8 +79,7 @@ function return_dictionaries(f, name, params; nruns)
                 r = readres(resfile)
             end
         end
-        o = r[size(r)[1]]
-        ϵ = params[2]
+        o = [x for x in r[size(r)[1]]]
         clusters = population_clusters([x for x in r[end]])
         merge!(fc,Dict(nr=>clusters))
         merge!(fo, Dict(nr=>o))
@@ -89,29 +88,22 @@ function return_dictionaries(f, name, params; nruns)
     return fo, fc, fi
 end
 
-# function write_aggregate(name, final_opinions, final_clusters, final_its)
-#     println("writing aggregate files")
-
-#     json_string = JSON.json(final_clusters)
-#     open("aggregate/final_clusters $name.json","w") do f
-#         println("doing final_clusters $name.json")
-#         write(f, json_string)
-#     end
-    
-#     json_string = JSON.json(final_opinions)
-#     open("aggregate/final_opinions $name.json","w") do f
-#         println("doing final_opinions $name.json")
-#         write(f, json_string)
-#     end
-
-#     json_string = JSON.json(final_its)
-#     open("aggregate/final_iterations $name.json","w") do f
-#         println("doing final_iterations $name.json")
-#         write(f, json_string)
-#     end
-
-#     println("done with final_*$name.json")
-# end
+function write_aggregate(name, final_opinions, final_clusters, final_its)
+    println("writing aggregate files")
+    json_string = JSON.json(final_clusters)
+    open("aggregate/final_clusters $name.json","w+") do f
+        write(f, json_string)
+    end
+    json_string = JSON.json(final_opinions)
+    open("aggregate/final_opinions $name.json","w+") do f
+        write(f, json_string)
+    end
+    json_string = JSON.json(final_its)
+    open("aggregate/final_iterations $name.json","w+") do f
+        write(f, json_string)
+    end
+    println("done")
+end
 
 function writeaverages(model, name, params, mos, n, p)
     # nca = nclusters(name, n)
@@ -126,9 +118,10 @@ function writeaverages(model, name, params, mos, n, p)
     string = "$n $p $ϵ $γ $γ $pₘ $max_t $mos"
     list = split(string)
     s = join(list, ",")
-    f = open("aggregate/averages $model $name.csv", "w")
-    write(f, s)
-    close(f)
+    open("aggregate/averages media $name.csv", "w+") do f
+        write(f, s)
+    end
+    println("done")
 end
 
 function plotting(f, name, params, nsteady, nr; spaghetti::Bool=false, finaldist::Bool=true)
