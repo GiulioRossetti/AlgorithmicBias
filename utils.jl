@@ -15,11 +15,21 @@ function keys_to_int(dict)
 end
 
 function splitstring(s)
-    v = split(s, r"\(|\)")
-    n1 = parse(Float16, v[3])
-    n2 =  parse(Float16, v[5])
-    return Tuple([Float16(n1), Float16(n2)])
-end
+    #     println("string=$s")
+        v = split(s, r"\(|\)| ")
+        nums = []
+        for i = 1:length(v)
+            try
+                n = parse(Float16, v[i])
+                append!(nums, n)
+            catch ArgumentError
+                println("per una volta ho fatto quello che dovevo fare diocane")
+                continue
+            end
+        end
+    #     println("nums=$nums")
+        return Tuple([Float16(nums[1]), Float16(nums[2])])
+    end
 
 function keys_to_tuple(dict)
     newdict = Dict([splitstring(key) => val for (key, val) in pairs(dict)])    

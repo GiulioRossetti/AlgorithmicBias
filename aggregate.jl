@@ -91,6 +91,7 @@ end
 function write_aggregate(name, final_opinions, final_clusters, final_its)
     println("writing aggregate files")
     json_string = JSON.json(final_clusters)
+    print(json_string)
     open("aggregate/final_clusters $name.json","w+") do f
         write(f, json_string)
     end
