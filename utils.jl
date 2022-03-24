@@ -182,6 +182,8 @@ function nclusters(name, n)
             append!(ncarray, [C])
         end
         return ncarray
+    else
+        println("file not found $name")
     end
 end
 
