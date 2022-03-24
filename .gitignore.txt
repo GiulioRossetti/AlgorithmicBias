@@ -1,5 +1,3 @@
-plots/evolution/
-plots/finaldistribution/
 res/
 .vscode/
 .ipynb_checkpoints/
