@@ -23,7 +23,6 @@ function splitstring(s)
                 n = parse(Float16, v[i])
                 append!(nums, n)
             catch ArgumentError
-                println("per una volta ho fatto quello che dovevo fare diocane")
                 continue
             end
         end
@@ -37,16 +36,21 @@ function keys_to_tuple(dict)
 end
 
 function read_json(filename)
-    inDict = JSON.parsefile(filename)
+    inDict = JSON.parsefile(filename, use_mmap=false)
     return inDict
 end
 
 function read_json_cluster(filename)
-    inDict = JSON.parsefile(filename)
+    #leggo il json con i cluster
+    inDict = JSON.parsefile(filename, use_mmap=false)
+    #trasformo le chiavi (nr) in interi
     newdict = keys_to_int(inDict)
+    #creo un dizionario vuoto
     newnewdict = Dict()
     for nr in keys(newdict)
-        newnewdict[nr] = Dict()
+        #per ogni chiave creo un dizionario vuoto dentro l'altro dizionario vuoto
+        # newnewdict[nr] = Dict()
+        #aggiungo il dizionario corrispondente alla nr con le chiavi trasformate da stringhe a tuple
         dicttoadd = keys_to_tuple(newdict[nr])
         newnewdict[nr] = dicttoadd
     end

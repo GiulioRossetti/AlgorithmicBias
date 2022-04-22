@@ -43,71 +43,104 @@ include("execution.jl")
 # end
 
 
-# function return_dictionaries(f, name, params; nruns)
+function return_dictionaries(f, name, params; nruns)
 
-#     function create_dictionaries()
-#         if isfile("aggregate/final_clusters $name.json")
-#             return
-#             # println("aggregate files already existing")
-#             # final_clusters = read_json_cluster("aggregate/final_clusters $name.json")
-#             # final_opinions = read_json("aggregate/final_opinions $name.json")
-#             # final_its = read_json("aggregate/final_iterations $name.json")
-#         else
-#             println("aggregate files not present")
-#             final_clusters = Dict()
-#             final_opinions = Dict()
-#             final_its = Dict()
-#         end
-#         return final_clusters, keys_to_int(final_opinions), keys_to_int(final_its)
-#     end
+    function create_dictionaries()
+        if isfile("aggregate/final_clusters $name.json")
+            println(">>> aggregate file already exists")
+            try
+                final_clusters = read_json_cluster("aggregate/final_clusters $name.json")
+            catch (e)
+                println(e)
+            end
+        else
+            println("aggregate final clusters files not present")
+            final_clusters = Dict()
+        end
 
-#     final_clusters, final_opinions, final_its = create_dictionaries()
+        if isfile("aggregate/final_opinions $name.json")
+            println(">>> aggregate file already exists")
+            try
+                final_opinions = read_json("aggregate/final_opinions $name.json")
+            catch (e)
+                println(e)
+            end
+        else
+            println("aggregate final opinions files not present")
+            final_opinions = Dict()
+        end
+
+        if isfile("aggregate/final_iterations $name.json")
+            println(">>> aggregate file already exists")
+            try
+                final_its = read_json("aggregate/final_iterations $name.json")
+            catch (e)
+                println(e)
+            end
+        else
+            println("aggregate final iterations files not present")
+            final_its = Dict()
+        end
+        println(">>> dictionaries created for $name")
+        return final_clusters, keys_to_int(final_opinions), keys_to_int(final_its)
+    end
+
+    final_clusters, final_opinions, final_its = create_dictionaries()
     
-#     fc = final_clusters
-#     fo = final_opinions
-#     fi = final_its
+    fc = final_clusters
+    fo = final_opinions
+    fi = final_its
 
-#     for nr in 1:nruns
-#         if nr in keys(fc)
-#             println(nr)
-#             continue
-#         else
-#             resfile = "res/$name nr$nr.csv"
-#             if isfile(resfile)
-#                 r = readres(resfile)
-#             else
-#                 multiple_runs(f, name, params, nsteady; nruns)
-#                 r = readres(resfile)
-#             end
-#         end
-#         o = [x for x in r[size(r)[1]]]
-#         clusters = population_clusters([x for x in r[end]])
-#         merge!(fc,Dict(nr=>clusters))
-#         merge!(fo, Dict(nr=>o))
-#         merge!(fi, Dict(nr=>size(r)[1]))
-#     end
-#     return fo, fc, fi
-# end
+    if (length(fc) == nruns) && (length(fi) == nruns) && (length(fo) == nruns)
+        println(">>> dictionaries already have all the runs")
+        return fo, fc, fi
+    else
+        for nr in 1:nruns
+            if nr in keys(fc) && nr in keys(fo) && nr in keys(fi)
+                println(">>> run $nr already present in dictionary")
+                continue
+            else
+                resfile = "res/$name nr$nr.csv"
+                if isfile(resfile)
+                    println(">>> run $nr not present in dictionary but present in res/")
+                    println(">>> reading $name nr$nr.csv file...")
+                    r = readres(resfile)
+                else
+                    # multiple_runs(f, name, params, nsteady; nruns)
+                    # r = readres(resfile)
+                    continue
+                end
+            end
+            o = [x for x in r[size(r)[1]]]
+            clusters = population_clusters([x for x in r[end]])
+            merge!(fc, Dict(nr=>clusters))
+            merge!(fo, Dict(nr=>o))
+            merge!(fi, Dict(nr=>size(r)[1]))
+        end
+        println(">>> dictionaries merged with new experiments results")
+        return fo, fc, fi
+    end
+end
 
-# function write_aggregate(name, final_opinions, final_clusters, final_its)
-#     println("writing aggregate files")
-#     json_string = JSON.json(final_clusters)
-#     print(json_string)
-#     open("aggregate/final_clusters $name.json","w+") do file
-#         write(file, json_string)
-#     end
-#     json_string = JSON.json(final_opinions)
-#     open("aggregate/final_opinions $name.json","w+") do f
-#         write(f, json_string)
-#     end
-#     json_string = JSON.json(final_its)
-#     open("aggregate/final_iterations $name.json","w+") do f
-#         write(f, json_string)
-#     end
-#     println("done")
-# end
+function write_aggregate(name, final_opinions, final_clusters, final_its)
+    println(">>> writing aggregate files")
+    json_string = JSON.json(final_clusters)
+    open("aggregate/final_clusters $name.json","w") do file
+        write(file, json_string)
+    end
+    json_string = JSON.json(final_opinions)
+    open("aggregate/final_opinions $name.json","w") do file2
+        write(file2, json_string)
+    end
+    json_string = JSON.json(final_its)
+    open("aggregate/final_iterations $name.json","w") do file3
+        write(file3, json_string)
+    end
+    println(">>> aggregate files for $name written")
+end
 
 function writeaverages(name, params, mos, n, p)
+    println(">>> writing averages files")
     nca = nclusters(name, n)
     pwda = pwdists(name, n)
     itsa = nits(name)
@@ -118,13 +151,11 @@ function writeaverages(name, params, mos, n, p)
     string = "$n $p $ϵ $γ $γ $pₘ $max_t $mos $avgnc $stdnc $avgpwd $stdpwd $avgnits $stdnits"
     list = split(string)
     s = join(list, ",")
-    if isfile("aggregate/averages media $name.csv") == false
-        println("adding")
-        open("aggregate/averages media $name.csv", "w+") do f
-            write(f, s)
-        end
+    # if isfile("aggregate/averages $name.csv") == false
+    open("aggregate/averages $name.csv", "w+") do file
+        write(file, s)
     end
-    println("done")
+    println(">>> averages files for $name written")
 end
 
 # function plotting(f, name, params, nsteady, nr; spaghetti::Bool=false, finaldist::Bool=true)
@@ -199,26 +230,27 @@ end
 # end
 
 
-function return_dictionaries(f, name, params; nruns)
+# function return_dictionaries(f, name, params; nruns)
    
-    fc = Dict()
-    fo = Dict()
-    fi = Dict()
+#     fc = Dict()
+#     fo = Dict()
+#     fi = Dict()
     
-    println("populating dictionaries for $name")
-    for nr in ProgressBar(1:nruns)
-        if isfile("res/$name nr$nr.csv")
-            r = readres("res/$name nr$nr.csv")
-        end
-        o = [x for x in (r[end])]
-        clusters = population_clusters(o)
-        merge!(fc,Dict(nr=>clusters))
-        merge!(fo, Dict(nr=>o))
-        merge!(fi, Dict(nr=>length(r)))
-    end
-    return fo, fc, fi
-    # return fo
-end
+#     println("populating dictionaries for $name")
+#     for nr in ProgressBar(1:nruns)
+#         if isfile("res/$name nr$nr.csv")
+#             r = readres("res/$name nr$nr.csv")
+#         end
+#         o = [x for x in (r[end])]
+#         clusters = population_clusters(o)
+#         merge!(fc,Dict(nr=>clusters))
+#         merge!(fo, Dict(nr=>o))
+#         merge!(fi, Dict(nr=>length(r)))
+#     end
+
+#     return fo, fc, fi
+
+# end
 
 
 # function write_finalops(name, final_opinions)
@@ -229,22 +261,22 @@ end
 #     println("done")
 # end
 
-function write_aggregate(name, final_opinions, final_clusters, final_its)
-    println("writing aggregate files")
-    json_string = JSON.json(final_clusters)
-    open("aggregate/final_clusters $name.json","w") do f
-        write(f, json_string)
-    end
-    json_string = JSON.json(final_opinions)
-    open("aggregate/final_opinions $name.json","w") do f
-        write(f, json_string)
-    end
-    json_string = JSON.json(final_its)
-    open("aggregate/final_iterations $name.json","w") do f
-        write(f, json_string)
-    end
-    println("done")
-end
+# function write_aggregate(name, final_opinions, final_clusters, final_its)
+#     println("writing aggregate files")
+#     json_string = JSON.json(final_clusters)
+#     open("aggregate/final_clusters $name.json","w") do f
+#         write(f, json_string)
+#     end
+#     json_string = JSON.json(final_opinions)
+#     open("aggregate/final_opinions $name.json","w") do f
+#         write(f, json_string)
+#     end
+#     json_string = JSON.json(final_its)
+#     open("aggregate/final_iterations $name.json","w") do f
+#         write(f, json_string)
+#     end
+#     println("done")
+# end
 
 # function writeaveragesmedia(name, params, mos, n, p)
 #     nca = nclusters(name, n)
