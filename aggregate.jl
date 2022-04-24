@@ -125,7 +125,7 @@ function return_dictionaries(f, name, params; nruns)
 
     if (length(fc) == nruns) && (length(fi) == nruns) && (length(fo) == nruns)
         println(">>> dictionaries already have all the runs")
-        return fo, fc, fi
+        return
     else
         for nr in 1:nruns
             if nr in keys(fc) && nr in keys(fo) && nr in keys(fi)
