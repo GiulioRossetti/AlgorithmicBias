@@ -42,7 +42,32 @@ include("execution.jl")
 #     end
 # end
 
-
+function deleteres(f, name, params; nruns)
+    try
+        final_clusters = read_json_cluster("aggregate/final_clusters $name.json")
+        final_opinions = read_json("aggregate/final_opinions $name.json")
+        final_iterations = read_json("aggregate/final_iterations $name.json")
+    catch e
+        println(e)
+        return
+    end
+    
+    for nr in 1:nruns
+        resfile = "res/$name nr$nr.csv"
+        if nr in keys(fc) && nr in keys(fo) && nr in keys(fi)
+            rm(resfile)
+            continue
+        else
+            if isfile(resfile)
+                println(">>> run $nr not present in dictionary but present in res/")
+            else
+                println(">>> run $nr not present in res/ nor in dictionary")
+                continue
+            end
+        end
+    end
+end
+        
 function return_dictionaries(f, name, params; nruns)
 
     function create_dictionaries()
@@ -54,7 +79,7 @@ function return_dictionaries(f, name, params; nruns)
                 println(e)
             end
         else
-            println("aggregate final clusters files not present")
+            println(">>> aggregate final clusters files not present")
             final_clusters = Dict()
         end
 
@@ -66,7 +91,7 @@ function return_dictionaries(f, name, params; nruns)
                 println(e)
             end
         else
-            println("aggregate final opinions files not present")
+            println(">>> aggregate final opinions files not present")
             final_opinions = Dict()
         end
 
@@ -78,7 +103,7 @@ function return_dictionaries(f, name, params; nruns)
                 println(e)
             end
         else
-            println("aggregate final iterations files not present")
+            println(">>> aggregate final iterations files not present")
             final_its = Dict()
         end
         println(">>> dictionaries created for $name")
@@ -106,9 +131,16 @@ function return_dictionaries(f, name, params; nruns)
                     println(">>> reading $name nr$nr.csv file...")
                     r = readres(resfile)
                 else
-                    # multiple_runs(f, name, params, nsteady; nruns)
-                    # r = readres(resfile)
-                    continue
+                    println(">>> Execution not performed yet. Do you want to start run?[yes/no]")
+                    risp = readline()
+                    if risp == "yes"
+                        multiple_runs(f, name, params, nsteady; nruns)
+                        r = readres(resfile)
+                    elseif risp == "no"
+                        continue
+                    else
+                        println(">>> did not understand input, skipping run anyways lol")
+                    end
                 end
             end
             o = [x for x in r[size(r)[1]]]
@@ -151,11 +183,11 @@ function writeaverages(name, params, mos, n, p)
     string = "$n $p $ϵ $γ $γ $pₘ $max_t $mos $avgnc $stdnc $avgpwd $stdpwd $avgnits $stdnits"
     list = split(string)
     s = join(list, ",")
-    # if isfile("aggregate/averages $name.csv") == false
-    open("aggregate/averages $name.csv", "w+") do file
-        write(file, s)
-    end
-    println(">>> averages files for $name written")
+    if isfile("aggregate/averages $name.csv") == false
+        open("aggregate/averages $name.csv", "w+") do file
+            write(file, s)
+        end
+        println(">>> averages files for $name written")
 end
 
 # function plotting(f, name, params, nsteady, nr; spaghetti::Bool=false, finaldist::Bool=true)
