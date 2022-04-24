@@ -52,7 +52,7 @@ function deleteres(f, name, params; nruns)
         return
     end
     
-    for nr in 1:nruns
+    for nr in 50:nruns
         resfile = "res/$name nr$nr.csv"
         finalopfile = "res/final_opinions $name nr$nr.csv"
         if nr in keys(fc) && nr in keys(fo) && nr in keys(fi)
@@ -194,6 +194,9 @@ function writeaverages(name, params, mos, n, p)
             write(file, s)
         end
         println(">>> averages files for $name written")
+    else
+        println(">>> averages file already exists...")
+    end
 end
 
 # function plotting(f, name, params, nsteady, nr; spaghetti::Bool=false, finaldist::Bool=true)
