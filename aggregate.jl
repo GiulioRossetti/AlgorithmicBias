@@ -44,9 +44,9 @@ include("execution.jl")
 
 function deleteres(f, name, params; nruns)
     try
-        final_clusters = read_json_cluster("aggregate/final_clusters $name.json")
-        final_opinions = read_json("aggregate/final_opinions $name.json")
-        final_iterations = read_json("aggregate/final_iterations $name.json")
+        fc = read_json_cluster("aggregate/final_clusters $name.json")
+        fo = keys_to_int(read_json("aggregate/final_opinions $name.json"))
+        fi = keys_to_int(read_json("aggregate/final_iterations $name.json"))
     catch e
         println(e)
         return
@@ -54,9 +54,15 @@ function deleteres(f, name, params; nruns)
     
     for nr in 1:nruns
         resfile = "res/$name nr$nr.csv"
+        finalopfile = "res/final_opinions $name nr$nr.csv"
         if nr in keys(fc) && nr in keys(fo) && nr in keys(fi)
-            rm(resfile)
-            continue
+            println(">>> run already present in aggregate file...")
+            println(">>> removing res file from hard disk...")
+            if isfile(resfile)
+                rm(resfile)
+            if isfile(finalopfile)
+                rm(finalopfile)
+            end
         else
             if isfile(resfile)
                 println(">>> run $nr not present in dictionary but present in res/")
