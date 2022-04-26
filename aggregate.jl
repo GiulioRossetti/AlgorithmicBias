@@ -53,8 +53,8 @@ function deleteres(f, name, params; nruns)
     end
     
     for nr in 50:nruns
-        resfile = "c:/res/$name nr$nr.csv"
-        finalopfile = "c:/res/final_opinions $name nr$nr.csv"
+        resfile = "res/$name nr$nr.csv"
+        finalopfile = "res/final_opinions $name nr$nr.csv"
         if nr in keys(fc) && nr in keys(fo) && nr in keys(fi)
             println(">>> run already present in aggregate file...")
             println(">>> removing res file from hard disk...")
