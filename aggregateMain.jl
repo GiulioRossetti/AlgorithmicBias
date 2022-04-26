@@ -32,6 +32,7 @@ for media_op in [[0.0], [0.5], [0.05, 0.95], [0.05, 0.5, 0.95]], pₘ in [0.0, 0
         writeaverages(name, params, mos, n, p)
     catch
         continue
+    end
     # deleteres(f, name, params; nruns)
 end
 
