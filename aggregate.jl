@@ -138,16 +138,10 @@ function return_dictionaries(f, name, params; nruns)
                     println(">>> reading $name nr$nr.csv file...")
                     r = readres(resfile)
                 else
-                    println(">>> Execution not performed yet. Do you want to start run?[yes/no]")
-                    risp = readline()
-                    if risp == "yes"
-                        multiple_runs(f, name, params, nsteady; nruns)
-                        r = readres(resfile)
-                    elseif risp == "no"
-                        continue
-                    else
-                        println(">>> did not understand input, skipping run anyways lol")
-                    end
+                    println(">>> performing execution")
+                    multiple_runs(f, name, params, nsteady; nruns)
+                    r = readres(resfile)
+                    rm(resfile)
                 end
             end
             o = [x for x in r[size(r)[1]]]
