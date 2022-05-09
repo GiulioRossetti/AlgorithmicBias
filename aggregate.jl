@@ -79,7 +79,7 @@ function return_dictionaries(f, name, params; nruns)
 
     function create_dictionaries()
         if isfile("aggregate/final_clusters $name.json")
-            println(">>> aggregate file already exists")
+            println(">>> final_clusters aggregate file already exists")
             try
                 final_clusters = read_json_cluster("aggregate/final_clusters $name.json")
             catch (e)
@@ -91,7 +91,7 @@ function return_dictionaries(f, name, params; nruns)
         end
 
         if isfile("aggregate/final_opinions $name.json")
-            println(">>> aggregate file already exists")
+            println(">>> final_opinions aggregate file already exists")
             try
                 final_opinions = read_json("aggregate/final_opinions $name.json")
             catch (e)
@@ -103,7 +103,7 @@ function return_dictionaries(f, name, params; nruns)
         end
 
         if isfile("aggregate/final_iterations $name.json")
-            println(">>> aggregate file already exists")
+            println(">>> final_iterations aggregate file already exists")
             try
                 final_its = read_json("aggregate/final_iterations $name.json")
             catch (e)
@@ -124,7 +124,7 @@ function return_dictionaries(f, name, params; nruns)
     fi = final_its
 
     if (length(fc) == nruns) && (length(fi) == nruns) && (length(fo) == nruns)
-        println(">>> dictionaries already have all the runs")
+        println(">>> dictionaries for $name already have all the runs")
         return
     else
         for nr in 1:nruns
@@ -138,7 +138,7 @@ function return_dictionaries(f, name, params; nruns)
                     println(">>> reading $name nr$nr.csv file...")
                     r = readres(resfile)
                 else
-                    # println(">>> performing execution")
+                    println(">>> run missing from res/")
                     # multiple_runs(f, name, params, nsteady; nruns)
                     # r = readres(resfile)
                     # rm(resfile)
@@ -377,3 +377,58 @@ end
 
 
 
+function didsomethingchange(f, name, params; nruns)
+
+    function create_dictionaries()
+        if isfile("aggregate/final_clusters $name.json")
+            println(">>> final_clusters aggregate file already exists")
+            try
+                final_clusters = read_json_cluster("aggregate/final_clusters $name.json")
+            catch (e)
+                println(e)
+            end
+        else
+            println(">>> aggregate final clusters files not present")
+            final_clusters = Dict()
+        end
+
+        if isfile("aggregate/final_opinions $name.json")
+            println(">>> final_opinions aggregate file already exists")
+            try
+                final_opinions = read_json("aggregate/final_opinions $name.json")
+            catch (e)
+                println(e)
+            end
+        else
+            println(">>> aggregate final opinions files not present")
+            final_opinions = Dict()
+        end
+
+        if isfile("aggregate/final_iterations $name.json")
+            println(">>> final_iterations aggregate file already exists")
+            try
+                final_its = read_json("aggregate/final_iterations $name.json")
+            catch (e)
+                println(e)
+            end
+        else
+            println(">>> aggregate final iterations files not present")
+            final_its = Dict()
+        end
+        println(">>> dictionaries created for $name")
+        return final_clusters, keys_to_int(final_opinions), keys_to_int(final_its)
+    end
+
+    final_clusters, final_opinions, final_its = create_dictionaries()
+    
+    fc = final_clusters
+    fo = final_opinions
+    fi = final_its
+
+    if (length(fc) == nruns) && (length(fi) == nruns) && (length(fo) == nruns)
+        println(">>> tutto ok")
+        return
+    else
+        println(">>> e non ha scritto il file diocane")
+    end
+end
