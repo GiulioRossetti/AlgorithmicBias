@@ -138,10 +138,11 @@ function return_dictionaries(f, name, params; nruns)
                     println(">>> reading $name nr$nr.csv file...")
                     r = readres(resfile)
                 else
-                    println(">>> performing execution")
-                    multiple_runs(f, name, params, nsteady; nruns)
-                    r = readres(resfile)
-                    rm(resfile)
+                   # println(">>> performing execution")
+                   # multiple_runs(f, name, params, nsteady; nruns)
+                   # r = readres(resfile)
+                   # rm(resfile)
+		   println(">>> run missing and res file not here")
                 end
             end
             o = [x for x in r[size(r)[1]]]
