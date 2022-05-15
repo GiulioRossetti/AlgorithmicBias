@@ -29,7 +29,8 @@ for media_op in [[0.0], [0.5], [0.05, 0.95], [0.05, 0.5, 0.95]], pₘ in [0.0, 0
     try
         final_opinions, final_clusters, final_its = return_dictionaries(f, name, params; nruns)
         write_aggregate(name, final_opinions, final_clusters, final_its)
-        writeaverages(name, params, mos, n, p)
+        didsomethingchange(f, name, params; nruns)
+        # writeaverages(name, params, mos, n, p)
     catch
         continue
     end
