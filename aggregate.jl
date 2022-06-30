@@ -74,50 +74,52 @@ function deleteres(f, name, params; nruns)
         end
     end
 end
+
+function create_dictionaries(name)
+    if isfile("aggregate/final_clusters $name.json")
+        println(">>> final_clusters aggregate file already exists")
+        try
+            final_clusters = read_json_cluster("aggregate/final_clusters $name.json")
+        catch (e)
+            println(e)
+        end
+    else
+        println(">>> aggregate final clusters files not present")
+        final_clusters = Dict()
+    end
+
+    if isfile("aggregate/final_opinions $name.json")
+        println(">>> final_opinions aggregate file already exists")
+        try
+            final_opinions = read_json("aggregate/final_opinions $name.json")
+        catch (e)
+            println(e)
+        end
+    else
+        println(">>> aggregate final opinions files not present")
+        final_opinions = Dict()
+    end
+
+    if isfile("aggregate/final_iterations $name.json")
+        println(">>> final_iterations aggregate file already exists")
+        try
+            final_its = read_json("aggregate/final_iterations $name.json")
+        catch (e)
+            println(e)
+        end
+    else
+        println(">>> aggregate final iterations files not present")
+        final_its = Dict()
+    end
+    println(">>> dictionaries created for $name")
+    return final_clusters, final_opinions, final_its
+end
         
 function return_dictionaries(f, name, params; nruns)
 
-    function create_dictionaries()
-        if isfile("aggregate/final_clusters $name.json")
-            println(">>> final_clusters aggregate file already exists")
-            try
-                final_clusters = read_json_cluster("aggregate/final_clusters $name.json")
-            catch (e)
-                println(e)
-            end
-        else
-            println(">>> aggregate final clusters files not present")
-            final_clusters = Dict()
-        end
+    println(">>> entering return_dictionaries for $name")
 
-        if isfile("aggregate/final_opinions $name.json")
-            println(">>> final_opinions aggregate file already exists")
-            try
-                final_opinions = read_json("aggregate/final_opinions $name.json")
-            catch (e)
-                println(e)
-            end
-        else
-            println(">>> aggregate final opinions files not present")
-            final_opinions = Dict()
-        end
-
-        if isfile("aggregate/final_iterations $name.json")
-            println(">>> final_iterations aggregate file already exists")
-            try
-                final_its = read_json("aggregate/final_iterations $name.json")
-            catch (e)
-                println(e)
-            end
-        else
-            println(">>> aggregate final iterations files not present")
-            final_its = Dict()
-        end
-        println(">>> dictionaries created for $name")
-        return final_clusters, keys_to_int(final_opinions), keys_to_int(final_its)
-    end
-
-    final_clusters, final_opinions, final_its = create_dictionaries()
+    final_clusters, final_opinions, final_its = create_dictionaries(name)
     
     fc = final_clusters
     fo = final_opinions
@@ -125,7 +127,7 @@ function return_dictionaries(f, name, params; nruns)
 
     if (length(fc) == nruns) && (length(fi) == nruns) && (length(fo) == nruns)
         println(">>> dictionaries for $name already have all the runs")
-        return
+        return fo, fc, fi
     else
         for nr in 1:nruns
             if nr in keys(fc) && nr in keys(fo) && nr in keys(fi)
@@ -145,11 +147,16 @@ function return_dictionaries(f, name, params; nruns)
                     continue
                 end
             end
-            o = [x for x in r[size(r)[1]]]
-            clusters = population_clusters([x for x in r[end]])
-            merge!(fc, Dict(nr=>clusters))
-            merge!(fo, Dict(nr=>o))
-            merge!(fi, Dict(nr=>size(r)[1]))
+            try
+                o = [x for x in r[size(r)[1]]]
+                clusters = population_clusters([x for x in r[end]])
+                merge!(fc, Dict(nr=>clusters))
+                merge!(fo, Dict(string(nr)=>o))
+                merge!(fi, Dict(string(nr)=>size(r)[1]))
+            catch (e)
+                println(e)
+                continue
+            end
         end
         println(">>> dictionaries merged with new experiments results")
         return fo, fc, fi
@@ -159,15 +166,15 @@ end
 function write_aggregate(name, final_opinions, final_clusters, final_its)
     println(">>> writing aggregate files")
     json_string = JSON.json(final_clusters)
-    open("aggregate/final_clusters $name.json","w") do file
+    open("aggregate/final_clusters $name new.json","w") do file
         write(file, json_string)
     end
     json_string = JSON.json(final_opinions)
-    open("aggregate/final_opinions $name.json","w") do file2
+    open("aggregate/final_opinions $name new.json","w") do file2
         write(file2, json_string)
     end
     json_string = JSON.json(final_its)
-    open("aggregate/final_iterations $name.json","w") do file3
+    open("aggregate/final_iterations $name new.json","w") do file3
         write(file3, json_string)
     end
     println(">>> aggregate files for $name written")
@@ -379,47 +386,7 @@ end
 
 function didsomethingchange(f, name, params; nruns)
 
-    function create_dictionaries()
-        if isfile("aggregate/final_clusters $name.json")
-            println(">>> final_clusters aggregate file already exists")
-            try
-                final_clusters = read_json_cluster("aggregate/final_clusters $name.json")
-            catch (e)
-                println(e)
-            end
-        else
-            println(">>> aggregate final clusters files not present")
-            final_clusters = Dict()
-        end
-
-        if isfile("aggregate/final_opinions $name.json")
-            println(">>> final_opinions aggregate file already exists")
-            try
-                final_opinions = read_json("aggregate/final_opinions $name.json")
-            catch (e)
-                println(e)
-            end
-        else
-            println(">>> aggregate final opinions files not present")
-            final_opinions = Dict()
-        end
-
-        if isfile("aggregate/final_iterations $name.json")
-            println(">>> final_iterations aggregate file already exists")
-            try
-                final_its = read_json("aggregate/final_iterations $name.json")
-            catch (e)
-                println(e)
-            end
-        else
-            println(">>> aggregate final iterations files not present")
-            final_its = Dict()
-        end
-        println(">>> dictionaries created for $name")
-        return final_clusters, keys_to_int(final_opinions), keys_to_int(final_its)
-    end
-
-    final_clusters, final_opinions, final_its = create_dictionaries()
+    final_clusters, final_opinions, final_its = create_dictionaries(name)
     
     fc = final_clusters
     fo = final_opinions
@@ -427,8 +394,11 @@ function didsomethingchange(f, name, params; nruns)
 
     if (length(fc) == nruns) && (length(fi) == nruns) && (length(fo) == nruns)
         println(">>> tutto ok")
-        return
+        return true
     else
-        println(">>> e non ha scritto il file diocane")
+        tot = nruns - length(fc) 
+        println("$name")
+        println(">>> mancano $tot runs dal file")
+        return false
     end
 end
