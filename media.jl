@@ -65,7 +65,7 @@ function bias_media_iteration(g, ϵ, γ, γₘ, pₘ, media_op, old_opinions, ne
             mediaₚϵ = [abs(new_opinions[u]- x)^(-γ) for x in media_op] #cambiato segno esponente
             mediaₚϵ /= sum(mediaₚϵ)
             selected = sample(media_op, Weights(mediaₚϵ))
-            if abs(new_opinions[u] - selected) <= ϵ               
+            if abs(new_opinions[u] - selected) < ϵ               
                 new_opinions[u] = Float16((selected + new_opinions[u]) / 2)
             end
         end
