@@ -114,8 +114,20 @@ function create_dictionaries(name)
     println(">>> dictionaries created for $name")
     return final_clusters, final_opinions, final_its
 end
+
+function write_files(f, name, params; nruns)
+    for nr in 1:nruns
+        try
+            fc, fo, fi = return_dictionaries(f, name, params; nr)
+            write_aggregate(name, fo, fc, fi)
+        catch (e)
+            println(e)
+            continue
+        end
+    end
+end
         
-function return_dictionaries(f, name, params; nruns)
+function return_dictionaries(f, name, params; nr)
 
     println(">>> entering return_dictionaries for $name")
 
@@ -129,38 +141,36 @@ function return_dictionaries(f, name, params; nruns)
         println(">>> dictionaries for $name already have all the runs")
         return fo, fc, fi
     else
-        for nr in 1:nruns
-            if nr in keys(fc) && nr in keys(fo) && nr in keys(fi)
-                println(">>> run $nr already present in dictionary")
-                continue
+        if nr in keys(fc) && nr in keys(fo) && nr in keys(fi)
+            println(">>> run $nr already present in dictionary")
+            return
+        else
+            resfile = "res/$name nr$nr.csv"
+            if isfile(resfile)
+                println(">>> run $nr not present in dictionary but present in res/")
+                println(">>> reading $name nr$nr.csv file...")
+                r = readres(resfile)
             else
-                resfile = "res/$name nr$nr.csv"
-                if isfile(resfile)
-                    println(">>> run $nr not present in dictionary but present in res/")
-                    println(">>> reading $name nr$nr.csv file...")
-                    r = readres(resfile)
-                else
-                    println(">>> run missing from res/")
-                    # multiple_runs(f, name, params, nsteady; nruns)
-                    # r = readres(resfile)
-                    # rm(resfile)
-                    continue
-                end
-            end
-            try
-                o = [x for x in r[size(r)[1]]]
-                clusters = population_clusters([x for x in r[end]])
-                merge!(fc, Dict(nr=>clusters))
-                merge!(fo, Dict(string(nr)=>o))
-                merge!(fi, Dict(string(nr)=>size(r)[1]))
-            catch (e)
-                println(e)
-                continue
+                println(">>> run missing from res/")
+                # multiple_runs(f, name, params, nsteady; nruns)
+                # r = readres(resfile)
+                # rm(resfile)
+                return
             end
         end
-        println(">>> dictionaries merged with new experiments results")
-        return fo, fc, fi
+        try
+            o = [x for x in r[size(r)[1]]]
+            clusters = population_clusters([x for x in r[end]])
+            merge!(fc, Dict(nr=>clusters))
+            merge!(fo, Dict(string(nr)=>o))
+            merge!(fi, Dict(string(nr)=>size(r)[1]))
+        catch (e)
+            println(e)
+            return
+        end
     end
+    println(">>> dictionaries merged with new experiments results")
+    return fo, fc, fi
 end
 
 function write_aggregate(name, final_opinions, final_clusters, final_its)
