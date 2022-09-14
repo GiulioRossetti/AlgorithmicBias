@@ -61,12 +61,16 @@ function readres(resfile)
     csv_reader = CSV.File(resfile, header=false)
     r = Vector{Any}()
     for row in csv_reader
-        opinions=Vector{Float16}()
-        for el in row
-            append!(opinions, el)
-            global ops = Tuple(opinions)
+        try
+            opinions=Vector{Float16}()
+            for el in row
+                append!(opinions, el)
+                global ops = Tuple(opinions)
+            end
+            append!(r, [ops])
+        catch
+            continue
         end
-        append!(r, [ops])
     end
     return r
 end

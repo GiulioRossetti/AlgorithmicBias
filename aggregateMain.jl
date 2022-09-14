@@ -32,6 +32,7 @@ for media_op in [[0.05, 0.5, 0.95]], pₘ in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5], ϵ 
     well = didsomethingchange(f, name, params; nruns)
     if well == false
         println(">>> non bene")
+        continue
     else
         println(">>> tutto bene")
         writeaverages(name, params, mos, n, p)

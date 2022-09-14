@@ -12,183 +12,135 @@ include("media.jl")
 include("utils.jl")
 include("execution.jl")
 
-# function checkifruns(f, name, params; nruns)
-#     # if isfile("aggregate/final_clusters $name.json")
-#     #     final_clusters = read_json_cluster("aggregate/final_clusters $name.json")
-#     #     final_opinions = read_json("aggregate/final_opinions $name.json")
-#     #     final_its = read_json("aggregate/final_iterations $name.json")
-#     # else
-#     #     println("final_clusters $name.json does not exist")
-#     #     return
-#     # end
+function write_files(f, name, params; nruns)
+    for nr in 1:nruns
+        fc, fo, fi = create_dictionaries(name)
 
-#     # fc = final_clusters
-#     # fo = keys_to_int(final_opinions)
-#     # fi = keys_to_int(final_its)
-#     for nr in 1:nruns
-#         # if nr in keys(fc)
-#         #     println(nr)
-#         #     continue
-#         # else
-#         # println("missing runs in final_clusters $name.json")
-#         resfile = "res/$name nr$nr.csv"
-#         if isfile(resfile)
-#             continue
-#         else
-#             println("missing run $name $nr")
-#             # multiple_runs(f, name, params, nsteady; nruns)
-#         end
-#         # end
-#     end
-# end
-
-function deleteres(f, name, params; nruns)
-    try
-        global fc = read_json_cluster("aggregate/final_clusters $name.json")
-        global fo = keys_to_int(read_json("aggregate/final_opinions $name.json"))
-        global fi = keys_to_int(read_json("aggregate/final_iterations $name.json"))
-    catch e
-        println(e)
-        return
-    end
-    
-    for nr in 50:nruns
-        resfile = "res/$name nr$nr.csv"
-        finalopfile = "res/final_opinions $name nr$nr.csv"
-        if nr in keys(fc) && nr in keys(fo) && nr in keys(fi)
-            println(">>> run already present in aggregate file...")
-            println(">>> removing res file from hard disk...")
-            if isfile(resfile)
-                rm(resfile)
-            end
-            if isfile(finalopfile)
-                rm(finalopfile)
-            end
+        if (length(fc) == nruns) && (length(fi) == nruns) && (length(fo) == nruns)
+            println(">>> dictionaries for $name already have all the runs")
+            break 
         else
-            if isfile(resfile)
-                println(">>> run $nr not present in dictionary but present in res/")
-            else
-                println(">>> run $nr not present in res/ nor in dictionary")
+            if nr in keys(fc) && string(nr) in keys(fo) && string(nr) in keys(fi)
+                println(">>> run $nr already present in dictionaries")
                 continue
+            else
+                println(">>> run $nr not present in dictionaries; changing dictionaries")
+                fo, fc, fi = change_dicts(name, fc, fo, fi; nr)
+                write_aggregate(name, fo, fc, fi; nr)
             end
         end
     end
 end
 
-function create_dictionaries(name)
-    if isfile("aggregate/final_clusters $name.json")
-        println(">>> final_clusters aggregate file already exists")
-        try
-            final_clusters = read_json_cluster("aggregate/final_clusters $name.json")
-        catch (e)
-            println(e)
+function change_dicts(name, fc, fo, fi; nr)
+    resfile = "res/$name nr$nr.csv"
+    if isfile(resfile)
+        println(">>> run $nr not present in dictionary but present in res/")
+        println(">>> reading $name nr$nr.csv file...")
+        r = readres(resfile)
+        if isempty(r)
+            println("res file is empty")
+            return fo, fc, fi
         end
     else
-        println(">>> aggregate final clusters files not present")
+        println(">>> run missing from res/")
+        # multiple_runs(f, name, params, nsteady; nruns)
+        # r = readres(resfile)
+        # rm(resfile)
+        return fo, fc, fi
+    end
+    val1 = nr ∉ keys(fc)
+    val2 = nr ∉ keys(fo)
+    val3 = nr ∉ keys(fi)
+    println(val1)
+    println(val2)
+    println(val3)
+
+    if nr ∉ keys(fc)
+        println("adding run $nr to fc")
+        clusters = population_clusters([x for x in r[end]])
+        merge!(fc, Dict(nr=>clusters))
+    end
+    
+    if string(nr) ∉ keys(fo)
+        println("adding run $nr to fo")
+        o = [x for x in r[size(r)[1]]]
+        merge!(fo, Dict(string(nr)=>o))
+    end
+    
+    if string(nr) ∉ keys(fi)
+        println("adding run $nr to fi")
+        merge!(fi, Dict(string(nr)=>size(r)[1]))
+    end
+
+    println(">>> dictionaries merged with new experiments results")
+
+    return fo, fc, fi
+end
+
+function write_aggregate(name, final_opinions, final_clusters, final_its; nr)
+    println(">>> writing aggregate files with nr $nr")
+
+    json_string = JSON.json(final_clusters)
+    open("aggregate/final_clusters $name.json","w") do file1
+        println("writing final_clusters")
+        write(file1, json_string)
+    end
+    json_string = JSON.json(final_opinions)
+    open("aggregate/final_opinions $name.json","w") do file2
+        println("writing final_opinions")
+        write(file2, json_string)
+    end
+    json_string = JSON.json(final_its)
+    open("aggregate/final_iterations $name.json","w") do file3
+        println("writing final_iterations")
+        write(file3, json_string)
+    end
+
+    println(">>> aggregate files for $name written with nr $nr")
+end
+
+function check(name; nr)
+    fc, fo, fi = create_dictionaries(name)
+    if nr in keys(fc) && string(nr) in keys(fo) && string(nr) in keys(fi)
+        println(">>> run $nr already present in dictionary as it should")
+        return 0
+    else
+        println(">>> run $nr not present problema!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        return 1
+    end
+end
+
+
+
+function create_dictionaries(name)
+    if isfile("aggregate/final_clusters $name.json")
+        # println(">>> final_clusters aggregate file already exists")
+        final_clusters = read_json_cluster("aggregate/final_clusters $name.json")
+    else
+        # println(">>> aggregate final clusters files not present")
         final_clusters = Dict()
     end
 
     if isfile("aggregate/final_opinions $name.json")
-        println(">>> final_opinions aggregate file already exists")
-        try
-            final_opinions = read_json("aggregate/final_opinions $name.json")
-        catch (e)
-            println(e)
-        end
+        # println(">>> final_opinions aggregate file already exists")
+        final_opinions = read_json("aggregate/final_opinions $name.json")
     else
-        println(">>> aggregate final opinions files not present")
+        # println(">>> aggregate final opinions files not present")
         final_opinions = Dict()
     end
 
     if isfile("aggregate/final_iterations $name.json")
-        println(">>> final_iterations aggregate file already exists")
-        try
-            final_its = read_json("aggregate/final_iterations $name.json")
-        catch (e)
-            println(e)
-        end
+        # println(">>> final_iterations aggregate file already exists")
+        final_its = read_json("aggregate/final_iterations $name.json")
     else
-        println(">>> aggregate final iterations files not present")
+        # println(">>> aggregate final iterations files not present")
         final_its = Dict()
     end
-    println(">>> dictionaries created for $name")
+    # println(">>> dictionaries created for $name")
     return final_clusters, final_opinions, final_its
 end
-
-function write_files(f, name, params; nruns)
-    for nr in 1:nruns
-        try
-            fc, fo, fi = return_dictionaries(f, name, params; nr)
-            write_aggregate(name, fo, fc, fi)
-        catch (e)
-            println(e)
-            continue
-        end
-    end
-end
-        
-function return_dictionaries(f, name, params; nr)
-
-    println(">>> entering return_dictionaries for $name")
-
-    final_clusters, final_opinions, final_its = create_dictionaries(name)
     
-    fc = final_clusters
-    fo = final_opinions
-    fi = final_its
-
-    if (length(fc) == nruns) && (length(fi) == nruns) && (length(fo) == nruns)
-        println(">>> dictionaries for $name already have all the runs")
-        return fo, fc, fi
-    else
-        if nr in keys(fc) && nr in keys(fo) && nr in keys(fi)
-            println(">>> run $nr already present in dictionary")
-            return
-        else
-            resfile = "res/$name nr$nr.csv"
-            if isfile(resfile)
-                println(">>> run $nr not present in dictionary but present in res/")
-                println(">>> reading $name nr$nr.csv file...")
-                r = readres(resfile)
-            else
-                println(">>> run missing from res/")
-                # multiple_runs(f, name, params, nsteady; nruns)
-                # r = readres(resfile)
-                # rm(resfile)
-                return
-            end
-        end
-        try
-            o = [x for x in r[size(r)[1]]]
-            clusters = population_clusters([x for x in r[end]])
-            merge!(fc, Dict(nr=>clusters))
-            merge!(fo, Dict(string(nr)=>o))
-            merge!(fi, Dict(string(nr)=>size(r)[1]))
-        catch (e)
-            println(e)
-            return
-        end
-    end
-    println(">>> dictionaries merged with new experiments results")
-    return fo, fc, fi
-end
-
-function write_aggregate(name, final_opinions, final_clusters, final_its)
-    println(">>> writing aggregate files")
-    json_string = JSON.json(final_clusters)
-    open("aggregate/final_clusters $name new.json","w") do file
-        write(file, json_string)
-    end
-    json_string = JSON.json(final_opinions)
-    open("aggregate/final_opinions $name new.json","w") do file2
-        write(file2, json_string)
-    end
-    json_string = JSON.json(final_its)
-    open("aggregate/final_iterations $name new.json","w") do file3
-        write(file3, json_string)
-    end
-    println(">>> aggregate files for $name written")
-end
 
 function writeaverages(name, params, mos, n, p)
     println(">>> writing averages files")
@@ -406,9 +358,11 @@ function didsomethingchange(f, name, params; nruns)
         println(">>> tutto ok")
         return true
     else
-        tot = nruns - length(fc) 
+        tot1 = nruns - length(fc) 
+        tot2 = nruns - length(fi)
+        tot3 = nruns - length(fo)
         println("$name")
-        println(">>> mancano $tot runs dal file")
+        println(">>> mancano $tot1 runs da fc, $tot2 da fi e $tot3 da fo")
         return false
     end
 end
