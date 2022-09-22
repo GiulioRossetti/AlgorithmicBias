@@ -40,17 +40,17 @@ function change_dicts(f, params, name, fc, fo, fi; nr)
         r = readres(resfile)
         if isempty(r)
             println("res file is empty")
-            multiple_runs(f, name, params, nsteady; nruns)
+            r = single_run(f, name, params, nsteady; nr)
             println("res file created")
-            r = readres(resfile)
+            # r = readres(resfile)
             # rm(resfile)
             # return fo, fc, fi
         end
     else
         println(">>> run missing from res/")
-        multiple_runs(f, name, params, nsteady; nruns)
+        r = single_run(f, name, params, nsteady; nr)
         println("res file created")
-        r = readres(resfile)
+        # r = readres(resfile)
         # rm(resfile)
         # return fo, fc, fi
     end
