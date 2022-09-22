@@ -21,23 +21,13 @@ max_t = 1000000
 nsteady = 1000
 nruns = 100
 
-for media_op in [[0.05, 0.5, 0.95]], pₘ in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5], ϵ in [0.2, 0.3, 0.4, 0.5], γ in [0.0, 0.5, 0.75, 1.0, 1.25, 1.5]
+for media_op in [[0.0], [0.5], [0.05, 0.95], [0.05, 0.5, 0.95]], pₘ in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5], ϵ in [0.2, 0.3, 0.4, 0.5], γ in [0.0, 0.5, 0.75, 1.0, 1.25, 1.5]
     f = deffuant_bias_media
     mos = join([string(el) for el in media_op], ";", ";")
     params = [g, ϵ, γ, γ, pₘ, media_op, max_t]
     name = "media mo$media_op p$pₘ e$ϵ g$γ gm$γ mi$max_t"
-    # final_opinions, final_clusters, final_its = return_dictionaries(f, name, params; nruns)
-    # write_aggregate(name, final_opinions, final_clusters, final_its)
     write_files(f, name, params; nruns)
-    well = didsomethingchange(f, name, params; nruns)
-    if well == false
-        println(">>> non bene")
-        continue
-    else
-        println(">>> tutto bene")
-        writeaverages(name, params, mos, n, p)
-        continue
-    end
+    writeaverages(name, params, mos, n, p)
 end
 
 # for pₘ in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5], ϵ in [0.2, 0.3, 0.4, 0.5], γ in [0.0, 0.5, 0.75, 1.0, 1.25, 1.5]

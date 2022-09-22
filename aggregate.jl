@@ -25,14 +25,14 @@ function write_files(f, name, params; nruns)
                 continue
             else
                 println(">>> run $nr not present in dictionaries; changing dictionaries")
-                fo, fc, fi = change_dicts(name, fc, fo, fi; nr)
-                write_aggregate(name, fo, fc, fi; nr)
+                fo, fc, fi = change_dicts(f, params, name, fc, fo, fi; nr)
+                write_aggregate(name, params, fo, fc, fi; nr)
             end
         end
     end
 end
 
-function change_dicts(name, fc, fo, fi; nr)
+function change_dicts(f, params, name, fc, fo, fi; nr)
     resfile = "res/$name nr$nr.csv"
     if isfile(resfile)
         println(">>> run $nr not present in dictionary but present in res/")
@@ -40,14 +40,19 @@ function change_dicts(name, fc, fo, fi; nr)
         r = readres(resfile)
         if isempty(r)
             println("res file is empty")
-            return fo, fc, fi
+            multiple_runs(f, name, params, nsteady; nruns)
+            println("res file created")
+            r = readres(resfile)
+            # rm(resfile)
+            # return fo, fc, fi
         end
     else
         println(">>> run missing from res/")
-        # multiple_runs(f, name, params, nsteady; nruns)
-        # r = readres(resfile)
+        multiple_runs(f, name, params, nsteady; nruns)
+        println("res file created")
+        r = readres(resfile)
         # rm(resfile)
-        return fo, fc, fi
+        # return fo, fc, fi
     end
     val1 = nr ∉ keys(fc)
     val2 = nr ∉ keys(fo)
@@ -154,14 +159,10 @@ function writeaverages(name, params, mos, n, p)
     string = "$n $p $ϵ $γ $γ $pₘ $max_t $mos $avgnc $stdnc $avgpwd $stdpwd $avgnits $stdnits"
     list = split(string)
     s = join(list, ",")
-    if isfile("aggregate/averages $name.csv") == false
-        open("aggregate/averages $name.csv", "w+") do file
-            write(file, s)
-        end
-        println(">>> averages files for $name written")
-    else
-        println(">>> averages file already exists...")
+    open("aggregate/averages $name new.csv", "w+") do file
+        write(file, s)
     end
+    println(">>> averages files for $name written")
 end
 
 # function plotting(f, name, params, nsteady, nr; spaghetti::Bool=false, finaldist::Bool=true)
