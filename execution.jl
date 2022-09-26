@@ -32,21 +32,11 @@ function multiple_runs(f, name, params, nsteady; nruns)
 end
 
 function single_run(f, name, params, nsteady; nr)
-    file = open("logfile.txt") 
-    files = readlines(file)
-    close(file)
-    if "$name nr$nr" in files
-        println("execution number $nr already present for params: $params -> skipping run $nr")
-    else
-        println("execution number $nr missing for params: $params -> starting run $nr")
-        r =  f(params... ; nsteady=nsteady)
-        df = DataFrame(r)
-        CSV.write("res/$name nr$nr.csv",  df, header=false)
-        CSV.write("res/final_opinions $name nr$nr.csv",  Tables.table([el for el in r[size(r)[1]]]), header=false, delim=',')
-        open("logfile.txt", "a+") do logfile
-            write(logfile, "$name nr$nr")
-        return r
-        end
-    end
+    println("execution number $nr missing for params: $params -> starting run $nr")
+    r =  f(params... ; nsteady=nsteady)
+    df = DataFrame(r)
+    CSV.write("res/$name nr$nr.csv",  df, header=false)
+    CSV.write("res/final_opinions $name nr$nr.csv",  Tables.table([el for el in r[size(r)[1]]]), header=false, delim=',')
+    return r
 end
 
