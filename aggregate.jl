@@ -83,7 +83,7 @@ function change_dicts(f, params, name, fc, fo, fi; nr)
     return fo, fc, fi
 end
 
-function write_aggregate(name, final_opinions, final_clusters, final_its; nr)
+function write_aggregate(name, params, final_opinions, final_clusters, final_its; nr)
     println(">>> writing aggregate files with nr $nr")
 
     json_string = JSON.json(final_clusters)
