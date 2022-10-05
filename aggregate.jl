@@ -159,7 +159,7 @@ function writeaverages(name, params, mos, n, p)
     string = "$n $p $ϵ $γ $γ $pₘ $max_t $mos $avgnc $stdnc $avgpwd $stdpwd $avgnits $stdnits"
     list = split(string)
     s = join(list, ",")
-    open("aggregate/averages $name new.csv", "w+") do file
+    open("aggregate/averages $name.csv", "w+") do file
         write(file, s)
     end
     println(">>> averages files for $name written")
