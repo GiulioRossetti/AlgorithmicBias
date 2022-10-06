@@ -32,11 +32,15 @@ function multiple_runs(f, name, params, nsteady; nruns)
 end
 
 function single_run(f, name, params, nsteady; nr)
-    println("execution number $nr missing for params: $params -> starting run $nr")
-    r =  f(params... ; nsteady=nsteady)
-    df = DataFrame(r)
-    CSV.write("res/$name nr$nr.csv",  df, header=false)
-    CSV.write("res/final_opinions $name nr$nr.csv",  Tables.table([el for el in r[size(r)[1]]]), header=false, delim=',')
-    return r
+    if isfile("res/for_spaghetti $name.csv")
+        return
+    else
+        println("execution number $nr missing for params: $params -> starting run $nr")
+        r =  f(params... ; nsteady=nsteady)
+        df = DataFrame(r)
+        CSV.write("res/for_spaghetti $name.csv",  df, header=false)
+        # CSV.write("res/final_opinions $name nr$nr.csv",  Tables.table([el for el in r[size(r)[1]]]), header=false, delim=',')
+        return r
+    end
 end
 
