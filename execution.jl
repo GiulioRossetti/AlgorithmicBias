@@ -38,7 +38,7 @@ function single_run(f, name, params, nsteady; nr)
         println("execution number $nr missing for params: $params -> starting run $nr")
         r =  f(params... ; nsteady=nsteady)
         df = DataFrame(r)
-        CSV.write("res/for_spaghetti $name.csv",  df, header=false)
+        CSV.write("res/for_spaghetti $name new.csv",  df, header=false)
         # CSV.write("res/final_opinions $name nr$nr.csv",  Tables.table([el for el in r[size(r)[1]]]), header=false, delim=',')
         return r
     end
