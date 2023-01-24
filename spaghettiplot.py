@@ -1,34 +1,16 @@
-import sys
-sys.path.append("/../Lib/")
-sys.path.append("/../Lib/netdspatch_local/")
-sys.path.append("/../Lib/ndlib_local/")
-
-import json
-import os
-import networkx as nx
-import ndlib_local.ndlib.models.ModelConfig as mc
-import ndlib_local.ndlib.models.opinions as op
-import warnings
-import matplotlib.pyplot as plt
-import future.utils
-import seaborn as sns
-import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import seaborn as sns
 import os
-from mpl_toolkits.mplot3d import Axes3D
-import os
 from matplotlib.colors import LinearSegmentedColormap
 import future.utils
-import json
 import numpy as np
 import tqdm
 plt.rcParams['axes.facecolor']='white'
 plt.rcParams['savefig.facecolor']='white'
 sns.set_style("whitegrid")
 
-warnings.filterwarnings("ignore")
+print('matplotlib: {}'. format(mpl.__version__))
 
 def hex_to_rgb(value):
     '''
@@ -77,6 +59,7 @@ heatmap_cmap=get_continuous_cmap(heatmap_hex_list)
 
 spaghetti_hex_list = ['#357db0', '#18A558', '#ce2626']
 spaghetti_cmap=get_continuous_cmap(spaghetti_hex_list)
+
 
 def from_res_to_iterations(name, nr):
     res = open("{}.csv".format(name))
@@ -191,15 +174,24 @@ def spaghettigridbye(results, imgfolder):
         plt.savefig(f"plots/{imgfolder}/{name}.png")
         plt.close()
 
+import os
+import networkx as nx
+import ndlib.models.ModelConfig as mc
+import ndlib.models.opinions as op
+import warnings
+warnings.filterwarnings("ignore")
+
 n = 100
 graph = nx.complete_graph(n)
 max_it = 1000000
+i=0
+types = ['extremist', 'moderate', 'polarised', 'balanced']
 for mo in [[0.0], [0.5], [0.05, 0.95], [0.05, 0.5, 0.95]]:
-    for pm in [0.0, 0.5]:
+    t = types[i]
+    for pm in [0.5]:
         for e in [0.2, 0.3, 0.4, 0.5]:
-            for g in [0.0]:
-                if not os.path.exists(f"plots/deffuant/spaghetti/spaghetti_mo{mo}_pm{pm}_e{e}_g{g}.png"):
-                    print(f"doing spaghetti_mo{mo}_pm{pm}_e{e}_g{g}")
+            for g in [0.0, 0.5, 1.0, 1.5]:
+                if not os.path.exists(f"plots/{t}/{t}_spaghetti_pm{pm}_e{e}_g{g}.png"):
                     model = op.AlgorithmicBiasMediaModel(graph)
                     config = mc.Configuration()
                     config.add_model_parameter("epsilon", e)
@@ -211,11 +203,14 @@ for mo in [[0.0], [0.5], [0.05, 0.95], [0.05, 0.5, 0.95]]:
                     model.set_media_opinions(mo)
                     # # Simulation execution
                     iterations = model.steady_state(max_iterations=max_it, nsteady=1000, sensibility=0.00001, node_status=True, progress_bar=True, drop_evolution=False)
+                    # fig, ax = plt.subplots(figsize=(7, 5), dpi=600)
+                    # evolution(iterations, spaghetti_hex_list, fig=fig, ax=ax)
+                    # plt.title(r'$\epsilon$='+f'{e},'+r'$\gamma$='+f'{g},'+r'$p_m$='+f'{pm}')
+                    # plt.savefig(f"plots/{t}/{t}_spaghetti_pm{pm}_e{e}_g{g}.png", bbox_inches="tight")
+                    # plt.close()
                     fig, ax = plt.subplots(figsize=(7, 5), dpi=600)
-                    evolution(iterations, spaghetti_hex_list, fig=fig, ax=ax)
+                    plt.scatter(x=[i for i in range(n)], y=sorted(list(iterations[len(iterations)-1]['status'].values())))
                     plt.title(r'$\epsilon$='+f'{e},'+r'$\gamma$='+f'{g},'+r'$p_m$='+f'{pm}')
-                    plt.savefig(f"plots/deffuant/spaghetti_mo{mo}_pm{pm}_e{e}_g{g}.png", bbox_inches="tight")
+                    plt.savefig(f"plots/{t}/{t}_finalopinions_pm{pm}_e{e}_g{g}.png", bbox_inches="tight")
                     plt.close()
-                else:
-                    print(f"plot plots/deffuant/spaghetti_mo{mo}_pm{pm}_e{e}_g{g}.png already present")
-                    continue
+    i += 1

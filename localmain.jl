@@ -21,7 +21,7 @@ max_t = 1000000
 nsteady = 1000
 nr=1
 
-for media_op in [[0.0]], pₘ in [0.0], ϵ in [0.3], γ in [2.0]
+for media_op in [[0.05, 0.5, 0.95]], pₘ in [0.0, 0.5], ϵ in [0.2, 0.3, 0.4, 0.5], γ in [0.0, 0.5, 1.0, 1.5]
     f = deffuant_bias_media
     params = [g, ϵ, γ, γ, pₘ, media_op, max_t]
     name = "media mo$media_op p$pₘ e$ϵ g$γ gm$γ mi$max_t"
